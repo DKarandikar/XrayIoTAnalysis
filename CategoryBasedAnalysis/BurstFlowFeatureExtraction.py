@@ -67,8 +67,8 @@ for file in f:
     # Class
     ### Class labels are specialised to Alexa currently
 
-    if "Time" in file and os.path.getsize(os.path.join(os.path.dirname(os.path.abspath(__file__)), "bursts", file)) > 30000:
-        flowClass = "1"
+    if "Timers" in file and os.path.getsize(os.path.join(os.path.dirname(os.path.abspath(__file__)), "bursts", file)) > 30000:
+        flowClass = "7"
     elif "Weather" in file and os.path.getsize(os.path.join(os.path.dirname(os.path.abspath(__file__)), "bursts", file)) > 30000:
         flowClass = "2"
     elif "Joke" in file and os.path.getsize(os.path.join(os.path.dirname(os.path.abspath(__file__)), "bursts", file)) > 30000:
@@ -77,6 +77,12 @@ for file in f:
         flowClass = "4"
     elif "Conversion" in file and os.path.getsize(os.path.join(os.path.dirname(os.path.abspath(__file__)), "bursts", file)) > 30000:
         flowClass = "5"
+    elif "Time" in file and os.path.getsize(os.path.join(os.path.dirname(os.path.abspath(__file__)), "bursts", file)) > 30000:
+        flowClass = "1"
+    elif "DayofWeek" in file and os.path.getsize(os.path.join(os.path.dirname(os.path.abspath(__file__)), "bursts", file)) > 30000:
+        flowClass = "6"
+    elif "Shopping" in file and os.path.getsize(os.path.join(os.path.dirname(os.path.abspath(__file__)), "bursts", file)) > 30000:
+        flowClass = "8"
     else:
         print("Noise")
         continue

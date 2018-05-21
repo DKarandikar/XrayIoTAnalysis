@@ -26,7 +26,6 @@ def forwardprop(X, w_1, w_2):
     return yhat
 
 def model(X, w):
-    
     yhat = tf.matmul(X, w)
     return yhat
 
@@ -37,8 +36,6 @@ def confusionMatrix(real, pred):
     for x in range(len(pred)):
         matrix[pred[x]-1, real[x]-1] += 1
     return matrix
-        
-    
 
 def get_data():
     """ Read the csv data set and split them into training and test sets """
@@ -47,9 +44,11 @@ def get_data():
     df = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalized.csv"),
             usecols = [x for x in range(2,NUMBER_COLUMNS-1)],
             header=None)
-    #df=pd.read_csv(r'C:\Users\danie\OneDrive\MSc_CS\Project\TensorFlow\noNoiseFive.csv',usecols = [4, 5],skiprows = [0],header=0)
     d = df.values
-    l = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalized.csv"),usecols = [1], header = None)
+
+    l = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalized.csv"),
+            usecols = [1], 
+            header = None)
     labels = l.values
 
     data = np.float32(d)
@@ -80,7 +79,7 @@ def main():
 
     # Layer's sizes
     x_size = train_X.shape[1]   # Number of input nodes 
-    h_size = 10                 # Number of hidden nodes
+    h_size = 15                 # Number of hidden nodes
     y_size = train_y.shape[1]   # Number of outcomes
 
     # Symbols
@@ -104,10 +103,11 @@ def main():
 
     # Run SGD
     sess = tf.Session()
+    saver = tf.train.Saver()
     init = tf.global_variables_initializer()
     sess.run(init)
 
-    for epoch in range(500):
+    for epoch in range(50000):
         # Train with each example
         for i in range(len(train_X)):
             sess.run(updates, feed_dict={X: train_X[i: i + 1], y: train_y[i: i + 1]})
@@ -120,16 +120,19 @@ def main():
         print("Epoch = %d, train accuracy = %.2f%%, test accuracy = %.2f%%"
               % (epoch + 1, 100. * train_accuracy, 100. * test_accuracy))
 
+        if (epoch + 1)%100 == 0:
+            saver.save(sess, os.path.join(os.path.dirname(os.path.abspath(__file__)), "models",  "iter_model"), global_step=epoch+1)
+
     final_predict = sess.run(predict, feed_dict={X: test_X, y: test_y})
     final_train_predict = sess.run(predict, feed_dict={X: train_X, y: train_y})
 
     sess.close()
-    print(RANDOM_SEED)
+    print("Seed: " + str(RANDOM_SEED))
     #print(np.argmax(train_y, axis=1))
     #print(final_train_predict)
 
-    print(np.argmax(test_y, axis=1))
-    print(final_predict)
+    #print(np.argmax(test_y, axis=1))
+    #print(final_predict)
 
     print(confusionMatrix(np.argmax(test_y, axis=1), final_predict))
 
