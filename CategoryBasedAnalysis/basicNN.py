@@ -1,5 +1,5 @@
 import tensorflow as tf
-import random
+import random, os
 import numpy as np
 import pandas as pd 
 from sklearn.model_selection import train_test_split
@@ -22,7 +22,7 @@ def forwardprop(X, w_1, w_2):
     """
     h    = tf.nn.sigmoid(tf.matmul(X, w_1))  # The \sigma function
     drop_out = tf.nn.dropout(h, 0.75)
-    yhat = tf.matmul(drop_out, w_2)  # The \varphi function
+    yhat = tf.matmul(h, w_2)  # The \varphi function
     return yhat
 
 def model(X, w):
@@ -42,12 +42,12 @@ def confusionMatrix(real, pred):
 
 def get_data():
     """ Read the csv data set and split them into training and test sets """
-    NUMBER_COLUMNS = 37
+    NUMBER_COLUMNS = 56
     
-    df=pd.read_csv(r'C:\Users\danie\OneDrive\MSc_CS\Project\TensorFlow\noNoiseFive.csv',usecols = [2,3] + [x for x in range(6,NUMBER_COLUMNS-1)],skiprows = [0],header=0)
+    df=pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "noNonBiDirect.csv"),usecols = [x for x in range(2,NUMBER_COLUMNS-1)],skiprows = [0],header=0)
     #df=pd.read_csv(r'C:\Users\danie\OneDrive\MSc_CS\Project\TensorFlow\noNoiseFive.csv',usecols = [4, 5],skiprows = [0],header=0)
     d = df.values
-    l = pd.read_csv(r'C:\Users\danie\OneDrive\MSc_CS\Project\TensorFlow\noNoiseFive.csv',usecols = [1] ,skiprows=[0], header=0)
+    l = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "noNonBiDirect.csv"),usecols = [1] ,skiprows=[0], header=0)
     labels = l.values
 
     data = np.float32(d)
