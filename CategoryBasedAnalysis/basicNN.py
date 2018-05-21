@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd 
 from sklearn.model_selection import train_test_split
 
-RANDOM_SEED = random.randint(1,100)
+#RANDOM_SEED = random.randint(1,100)
 RANDOM_SEED = 83
 #print(RANDOM_SEED)
 tf.set_random_seed(RANDOM_SEED)
@@ -44,10 +44,12 @@ def get_data():
     """ Read the csv data set and split them into training and test sets """
     NUMBER_COLUMNS = 56
     
-    df=pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "noNonBiDirect.csv"),usecols = [x for x in range(2,NUMBER_COLUMNS-1)],skiprows = [0],header=0)
+    df = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalized.csv"),
+            usecols = [x for x in range(2,NUMBER_COLUMNS-1)],
+            header=None)
     #df=pd.read_csv(r'C:\Users\danie\OneDrive\MSc_CS\Project\TensorFlow\noNoiseFive.csv',usecols = [4, 5],skiprows = [0],header=0)
     d = df.values
-    l = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "noNonBiDirect.csv"),usecols = [1] ,skiprows=[0], header=0)
+    l = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalized.csv"),usecols = [1], header = None)
     labels = l.values
 
     data = np.float32(d)
@@ -86,14 +88,14 @@ def main():
     y = tf.placeholder("float", shape=[None, y_size])
 
     # Weight initializations
-    #w_1 = init_weights((x_size, h_size))
-    #w_2 = init_weights((h_size, y_size))
+    w_1 = init_weights((x_size, h_size))
+    w_2 = init_weights((h_size, y_size))
 
-    w = init_weights((x_size, y_size))
+    #w = init_weights((x_size, y_size))
 
     # Forward propagation
-    #yhat    = forwardprop(X, w_1, w_2)
-    yhat = model(X, w)
+    yhat    = forwardprop(X, w_1, w_2)
+    #yhat = model(X, w)
     predict = tf.argmax(yhat, axis=1)
 
     # Backward propagation

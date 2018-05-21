@@ -1,7 +1,7 @@
-import statistics, pyshark
+import statistics, pyshark, os
 import matplotlib.pyplot as plt
 
-pkts = pyshark.FileCapture("AlexaTimed2.pcap")
+pkts = pyshark.FileCapture(os.path.join(os.path.dirname(os.path.abspath(__file__)), "AlexaWeather5.pcap"))
 
 initialTime = float(pkts[0].sniff_timestamp)
 
