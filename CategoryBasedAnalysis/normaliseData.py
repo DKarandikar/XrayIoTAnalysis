@@ -2,12 +2,17 @@ import os
 import pandas as pd
 
 NUMBER_COLUMNS = 56
+NUMBER_FEATURES = 54
 
-df = pd.read_csv( os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "noNonBiDirect.csv"), usecols = [x for x in range(4,NUMBER_COLUMNS)], header=None)
-df2 = pd.read_csv( os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "noNonBiDirect.csv"), usecols = [x for x in range(0,4)], header=None)
+ORIGINAL_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "FlowFeatures.csv")
+OUTPUT_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalized.csv")
+
+df = pd.read_csv( ORIGINAL_DATA, usecols = [x for x in range(NUMBER_COLUMNS-NUMBER_FEATURES,NUMBER_COLUMNS)], header=None)
+df2 = pd.read_csv( ORIGINAL_DATA, usecols = [x for x in range(0,NUMBER_COLUMNS-NUMBER_FEATURES)], header=None)
+
 normalized_df = (df-df.min())/(df.max()-df.min()+0.000000000000000001)
 
-print(normalized_df)
+#print(normalized_df)
 
 big = pd.merge(df2, normalized_df, on=df2.index, how='inner')
 
@@ -15,4 +20,4 @@ del big['key_0']
 
 print(big)
 
-big.to_csv( os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalized.csv"), index = False, header=None) 
+big.to_csv( OUTPUT_DATA, index = False, header=None) 

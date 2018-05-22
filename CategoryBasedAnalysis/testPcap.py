@@ -13,21 +13,26 @@ BURST_PACKET_NO_CUTOFF = 60
 BURST_TIME_INTERVAL = 1.0
 
 MODELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
-TRAINED_MODEL_META = os.path.join(MODELS_PATH, "iter_model-15500.meta")
+TRAINED_MODEL_META = os.path.join(MODELS_PATH, "iter_model-500.meta")
+FEATURES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "FlowFeatures.csv")
 
 NUMBER_COLUMNS = 56
 
-DF = pd.read_csv( os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "noNonBiDirect.csv"), usecols = [x for x in range(4,NUMBER_COLUMNS)], header=None)
+DF = pd.read_csv(FEATURES_FILE, usecols = [x for x in range(2,NUMBER_COLUMNS)], header=None)
 
 def normaliseColumn(array, colNo):
+    """
+    Min-max normalise data in array (a N * 54 shape) w.r.t. max/min in FEATURES_FILE
+    """
     values = array[:, colNo]
     
-    normalized = (values - DF.iloc[:,colNo-2].min()) / (DF.iloc[:,colNo-2].max() - DF.iloc[:,colNo-2].min() + 0.000000000000000001)
-    if colNo == 2:
-        print(DF.iloc[:,colNo-2])
-        print(values)
-        print(DF.iloc[:,colNo-2].min())
-        print(DF.iloc[:,colNo-2].max())
+    normalized = (values - DF.iloc[:,colNo].min()) / (DF.iloc[:,colNo].max() - DF.iloc[:,colNo].min() + 0.000000000000000001)
+    
+    # if colNo == 2:
+    #     print(DF.iloc[:,colNo-2])
+    #     print(values)
+    #     print(DF.iloc[:,colNo-2].min())
+    #     print(DF.iloc[:,colNo-2].max())
 
     array[:, colNo] = normalized
     return array
@@ -42,8 +47,11 @@ def forwardprop(X, w_1, w_2):
     yhat = tf.matmul(h, w_2)  # The \varphi function
     return yhat
 
-# Get a variety of statistics out of a list of Ints
+
 def getStatistics(listInts):
+    """
+    Get 18 statistical features out of a list of integers
+    """
     result = []
     df = pd.DataFrame()
     df['data'] = listInts

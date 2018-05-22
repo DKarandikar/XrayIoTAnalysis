@@ -5,7 +5,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 RANDOM_SEED = 83
-SAVE = False
+SAVE = True
 NUMBER_COLUMNS = 56
 FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalized.csv")
 
@@ -18,7 +18,7 @@ def init_weights(shape):
 
 def forwardprop(X, w_1, w_2):
     """
-    Forward-propagation.
+    Forward-propagation
     IMPORTANT: yhat is not softmax since TensorFlow's softmax_cross_entropy_with_logits() does that internally.
     """
     h    = tf.nn.sigmoid(tf.matmul(X, w_1))  # The \sigma function
@@ -27,10 +27,12 @@ def forwardprop(X, w_1, w_2):
     return yhat
 
 def model(X, w):
+    """ A simpler model for use sometimes """
     yhat = tf.matmul(X, w)
     return yhat
 
 def confusionMatrix(real, pred):
+    """ Constructs a confusion matrix out of real and pred"""
     num_classes = np.max(real)
     matrix = np.zeros((num_classes, num_classes))
     print(matrix.shape)
@@ -40,10 +42,9 @@ def confusionMatrix(real, pred):
 
 def get_data():
     """ Read the csv data set and split them into training and test sets """
-    
-    
+
     df = pd.read_csv(FILE_PATH,
-            usecols = [x for x in range(2,NUMBER_COLUMNS-1)],
+            usecols = [x for x in range(2,NUMBER_COLUMNS)],
             header=None)
     d = df.values
 
@@ -56,8 +57,9 @@ def get_data():
     target = labels.flatten()
 
     #print(data.shape)
-
-    data /= np.max(np.abs(data)+0.0000001, axis=0)
+    
+    # Data should be already min-max normalised
+    #data /= np.max(np.abs(data)+0.0000001, axis=0)
 
     print(data)
 
@@ -79,7 +81,7 @@ def main():
     #print(train_y)
 
     # Layer's sizes
-    x_size = train_X.shape[1]   # Number of input nodes 
+    x_size = train_X.shape[1]   # Number of input nodes , which is NUMBER_COLUMNS - 2 + 1
     h_size = 15                 # Number of hidden nodes
     y_size = train_y.shape[1]   # Number of outcomes
 
@@ -111,7 +113,7 @@ def main():
     print(sess.run(w_1))
     print(sess.run(w_2))
 
-    for epoch in range(50000):
+    for epoch in range(500):
         # Train with each example
         for i in range(len(train_X)):
             sess.run(updates, feed_dict={X: train_X[i: i + 1], y: train_y[i: i + 1]})
@@ -126,16 +128,14 @@ def main():
 
         if (epoch + 1)%100 == 0 and SAVE:
             saver.save(sess, os.path.join(os.path.dirname(os.path.abspath(__file__)), "models",  "iter_model"), global_step=epoch+1)
-            print(sess.run(w_1))
-            print(sess.run(w_2))
+            #print(sess.run(w_1))
+            #print(sess.run(w_2))
 
     final_predict = sess.run(predict, feed_dict={X: test_X, y: test_y})
     final_train_predict = sess.run(predict, feed_dict={X: train_X, y: train_y})
 
     sess.close()
     print("Seed: " + str(RANDOM_SEED))
-    #print(np.argmax(train_y, axis=1))
-    #print(final_train_predict)
 
     #print(np.argmax(test_y, axis=1))
     #print(final_predict)

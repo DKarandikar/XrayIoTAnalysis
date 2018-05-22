@@ -7,6 +7,7 @@ from tensorflow.python.tools.inspect_checkpoint import print_tensors_in_checkpoi
 
 RANDOM_SEED = 83
 MODELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
+MODEL_META_FILENAME = "iter_model-500.meta"
 
 NUMBER_COLUMNS = 56
 FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalized.csv")
@@ -40,7 +41,7 @@ def get_data():
     """ Read the csv data set and split them into training and test sets """
     
     df = pd.read_csv(FILE_PATH,
-            usecols = [x for x in range(2,NUMBER_COLUMNS-1)],
+            usecols = [x for x in range(2,NUMBER_COLUMNS)],
             header=None)
     d = df.values
 
@@ -54,7 +55,7 @@ def get_data():
 
     #print(data.shape)
 
-    data /= np.max(np.abs(data)+0.0000001, axis=0)
+    #data /= np.max(np.abs(data)+0.0000001, axis=0)
 
     #print(data)
 
@@ -72,7 +73,7 @@ def get_data():
 
 
 def main(): 
-    imported_meta = tf.train.import_meta_graph(os.path.join(MODELS_PATH, "iter_model-15500.meta"))  
+    imported_meta = tf.train.import_meta_graph(os.path.join(MODELS_PATH, MODEL_META_FILENAME))  
     
     #print_tensors_in_checkpoint_file(file_name=os.path.join(MODELS_PATH, "iter_model-15500"), tensor_name = '', all_tensors=False)
     
