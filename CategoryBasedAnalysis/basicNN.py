@@ -4,11 +4,12 @@ import numpy as np
 import pandas as pd 
 from sklearn.model_selection import train_test_split
 
-#RANDOM_SEED = random.randint(1,100)
 RANDOM_SEED = 83
-#print(RANDOM_SEED)
-tf.set_random_seed(RANDOM_SEED)
+SAVE = False
+NUMBER_COLUMNS = 56
+FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalized.csv")
 
+tf.set_random_seed(RANDOM_SEED)
 
 def init_weights(shape):
     """ Weight initialization """
@@ -39,14 +40,14 @@ def confusionMatrix(real, pred):
 
 def get_data():
     """ Read the csv data set and split them into training and test sets """
-    NUMBER_COLUMNS = 56
     
-    df = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalized.csv"),
+    
+    df = pd.read_csv(FILE_PATH,
             usecols = [x for x in range(2,NUMBER_COLUMNS-1)],
             header=None)
     d = df.values
 
-    l = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalized.csv"),
+    l = pd.read_csv(FILE_PATH,
             usecols = [1], 
             header = None)
     labels = l.values
@@ -107,6 +108,9 @@ def main():
     init = tf.global_variables_initializer()
     sess.run(init)
 
+    print(sess.run(w_1))
+    print(sess.run(w_2))
+
     for epoch in range(50000):
         # Train with each example
         for i in range(len(train_X)):
@@ -120,8 +124,10 @@ def main():
         print("Epoch = %d, train accuracy = %.2f%%, test accuracy = %.2f%%"
               % (epoch + 1, 100. * train_accuracy, 100. * test_accuracy))
 
-        if (epoch + 1)%100 == 0:
+        if (epoch + 1)%100 == 0 and SAVE:
             saver.save(sess, os.path.join(os.path.dirname(os.path.abspath(__file__)), "models",  "iter_model"), global_step=epoch+1)
+            print(sess.run(w_1))
+            print(sess.run(w_2))
 
     final_predict = sess.run(predict, feed_dict={X: test_X, y: test_y})
     final_train_predict = sess.run(predict, feed_dict={X: train_X, y: train_y})
