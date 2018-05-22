@@ -159,8 +159,14 @@ for file in f:
                 row = []
                 row.append(file.split(".")[0] + "Flow" + str(counter))
                 row.append(flowClass)
-                row.extend(res)
-                row.extend(res2)
+
+                # Ensure data is added in the following order: OUT / IN / BOTH
+                if pair[0] == DEVICE_IP:
+                    row.extend(res)
+                    row.extend(res2)
+                else:
+                    row.extend(res2)
+                    row.extend(res)
                 row.extend(res3)
 
                 counter += 1

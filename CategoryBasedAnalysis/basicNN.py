@@ -113,7 +113,7 @@ def main():
     print(sess.run(w_1))
     print(sess.run(w_2))
 
-    for epoch in range(500):
+    for epoch in range(50000):
         # Train with each example
         for i in range(len(train_X)):
             sess.run(updates, feed_dict={X: train_X[i: i + 1], y: train_y[i: i + 1]})
