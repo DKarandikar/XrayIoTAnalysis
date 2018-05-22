@@ -85,6 +85,9 @@ def main():
 
         train_X, test_X, train_y, test_y = get_data()
 
+        #np.set_printoptions(threshold=np.inf)
+        print(test_X)
+
         # Layer's sizes
         x_size = train_X.shape[1]   # Number of input nodes 
         h_size = 15                 # Number of hidden nodes

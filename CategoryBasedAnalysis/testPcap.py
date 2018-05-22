@@ -17,6 +17,7 @@ TRAINED_MODEL_META = os.path.join(MODELS_PATH, "iter_model-15500.meta")
 
 def normaliseColumn(array, colNo):
     values = array[:, colNo]
+    print(values)
     normalized = (values - values.min()) / (values.max() - values.min() + 0.000000000000000001)
 
     array[:, colNo] = normalized
@@ -75,6 +76,8 @@ def main(fileName):
 
     ### Seprate out all the flows
 
+    #print("Length is: " + str(len(validBursts)))
+
     flowStatistics = []
 
     # Get all IP sources and dests
@@ -94,6 +97,8 @@ def main(fileName):
         
         
         srcdest = list(srcdest)
+
+        print(srcdest)
 
         ### Get lengths of flows
         ### Lengths of packets for each direction and bi-directional
@@ -164,10 +169,24 @@ def main(fileName):
 
     print(validFlows)
 
-    data = np.array(validFlows, dtype='float32')[:, 2:]
+    data = np.array(validFlows, dtype='float32')[:, 2:55]
 
-    for x in range(0,54):
+    for x in range(2,53):
         data = normaliseColumn(data, x)
+
+    #print(data)
+
+    data /= np.max(np.abs(data)+0.0000001, axis=0)
+
+    #np.set_printoptions(threshold=np.inf)
+    #print(data)
+
+    N, M  = data.shape
+    all_X = np.ones((N, M + 1))
+    all_X[:, 1:] = data
+
+    print(all_X)
+    np.savetxt("test.txt", all_X)
 
     ### Categorise using the trained model
 
@@ -189,12 +208,12 @@ def main(fileName):
 
         predict = tf.argmax(forwardprop(X, w1, w2), axis=1)
 
-        final_predict = sess.run(predict, feed_dict={X: np.array(validFlows)[:, 2:]})
+        final_predict = sess.run(predict, feed_dict={X: all_X})
 
         print(final_predict)
 
 
 if __name__ == '__main__':
     #filename = input("Type pcap filename")
-    filename = "AlexaJoke1"
+    filename = "AlexaTime1"
     main(filename)
