@@ -15,10 +15,19 @@ BURST_TIME_INTERVAL = 1.0
 MODELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
 TRAINED_MODEL_META = os.path.join(MODELS_PATH, "iter_model-15500.meta")
 
+NUMBER_COLUMNS = 56
+
+DF = pd.read_csv( os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "noNonBiDirect.csv"), usecols = [x for x in range(4,NUMBER_COLUMNS)], header=None)
+
 def normaliseColumn(array, colNo):
     values = array[:, colNo]
-    print(values)
-    normalized = (values - values.min()) / (values.max() - values.min() + 0.000000000000000001)
+    
+    normalized = (values - DF.iloc[:,colNo-2].min()) / (DF.iloc[:,colNo-2].max() - DF.iloc[:,colNo-2].min() + 0.000000000000000001)
+    if colNo == 2:
+        print(DF.iloc[:,colNo-2])
+        print(values)
+        print(DF.iloc[:,colNo-2].min())
+        print(DF.iloc[:,colNo-2].max())
 
     array[:, colNo] = normalized
     return array
@@ -73,6 +82,9 @@ def main(fileName):
                 validBursts.append(nextPcap)
             currentTime = float(p.sniff_timestamp)
             nextPcap = [p]
+
+    if len(nextPcap) > BURST_PACKET_NO_CUTOFF:
+        validBursts.append(nextPcap)
 
     ### Seprate out all the flows
 
@@ -176,7 +188,7 @@ def main(fileName):
 
     #print(data)
 
-    data /= np.max(np.abs(data)+0.0000001, axis=0)
+    #data /= np.max(np.abs(data)+0.0000001, axis=0)
 
     #np.set_printoptions(threshold=np.inf)
     #print(data)
@@ -184,6 +196,9 @@ def main(fileName):
     N, M  = data.shape
     all_X = np.ones((N, M + 1))
     all_X[:, 1:] = data
+
+    all_X[:, 1] = np.ones(N)
+    all_X[:, 2] = np.ones(N)
 
     print(all_X)
     np.savetxt("test.txt", all_X)
@@ -215,5 +230,5 @@ def main(fileName):
 
 if __name__ == '__main__':
     #filename = input("Type pcap filename")
-    filename = "AlexaTime1"
+    filename = "AlexaTest2"
     main(filename)
