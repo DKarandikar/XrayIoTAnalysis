@@ -1,12 +1,12 @@
 import statistics, pyshark, os
 import matplotlib.pyplot as plt
 
-pkts = pyshark.FileCapture(os.path.join(os.path.dirname(os.path.abspath(__file__)), "pcaps", "HueOnOff1.pcap"))
+pkts = pyshark.FileCapture(os.path.join(os.path.dirname(os.path.abspath(__file__)), "pcaps", "HueOnOffAlexa1"))
 
 DEVICE_IP = "192.168.4.16"
 PHONE_IP = "192.168.4.19"
 
-IGNORE_PHONE = True
+IGNORE_PHONE = False
 
 initialTime = float(pkts[0].sniff_timestamp)
 

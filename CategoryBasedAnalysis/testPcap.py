@@ -4,24 +4,28 @@ import pandas as pd
 import tensorflow as tf
 import numpy as np
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+
 
 BURST_PACKET_NO_CUTOFF = 60
 BURST_TIME_INTERVAL = 1.0
 FLOW_SIZE_CUTOFF = 10   # Minimum number of packets to be counted as a valid flow
 
 MODELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
-TRAINED_MODEL_META = os.path.join(MODELS_PATH, "iter_model-7800.meta")
+MAIN_MODEL_META = os.path.join(MODELS_PATH, "iter_model-7800.meta")
+MAIN_MODEL_NAME = "iter_model-7800"
 NUMBER_HIDDEN_NODES_USED = 15
 NUMBER_CLASSES_USED = 8
 
 GETINPUT = False
-TEST_FILENAME = "AlexaDayofWeek1"
+TEST_FILENAME = "AlexaTest1"
 
 DEVICE_IP = "192.168.4.2"
 
+NUMBER_COLUMNS = 56
 FEATURES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "FlowFeatures.csv")
 DF = pd.read_csv(FEATURES_FILE, usecols = [x for x in range(2,NUMBER_COLUMNS)], header=None)
-NUMBER_COLUMNS = 56
+
 
 def normaliseColumn(array, colNo):
     """
@@ -193,37 +197,43 @@ def addBiases(data):
     all_X[:, 1:] = data
     return all_X
 
-def modelPrediction(data):
+def modelPrediction(data, model_name, models_path, classes):
     """ 
-    Runs the model on data and outputs predictions
+    Runs the model specified in model_name located at the path on data and outputs predictions
     Uses lots of the constants at the top of the file for model data
+    Requires the number of classes since I don't think this is stored in tf meta files
     """
-    imported_meta = tf.train.import_meta_graph(TRAINED_MODEL_META)  
     
-    with tf.Session() as sess:
+    localGraph = tf.Graph()
+    
+    with tf.Session(graph = localGraph) as sess:
+        with localGraph.as_default():
+            imported_meta = tf.train.import_meta_graph(os.path.join(models_path, model_name + ".meta"))  
 
-        imported_meta.restore(sess, tf.train.latest_checkpoint(MODELS_PATH))
-        graph = tf.get_default_graph()
+            imported_meta.restore(sess, os.path.join(models_path, model_name))
+            graph = tf.get_default_graph()
 
-        w1 = graph.get_tensor_by_name("Variable:0")
-        w2 = graph.get_tensor_by_name("Variable_1:0")
+            w1 = graph.get_tensor_by_name("Variable:0")
+            w2 = graph.get_tensor_by_name("Variable_1:0")
 
-        # Layer's sizes
-        x_size = data.shape[1]                            # Number of input nodes 
-        h_size = NUMBER_HIDDEN_NODES_USED                 # Number of hidden nodes
-        y_size = NUMBER_CLASSES_USED                      # Number of outcomes
-         
-        X = tf.placeholder("float", shape=[None, x_size])
+            # Layer's sizes
+            x_size = data.shape[1]                            # Number of input nodes 
+            h_size = NUMBER_HIDDEN_NODES_USED                 # Number of hidden nodes
+            y_size = classes + 1                                  # Number of outcomes
+            
+            print(y_size)
 
-        predict = tf.argmax(forwardprop(X, w1, w2), axis=1)
+            X = tf.placeholder("float", shape=[None, x_size])
 
-        final_predict = sess.run(predict, feed_dict={X: data})
+            predict = tf.argmax(forwardprop(X, w1, w2), axis=1)
 
-        values = sess.run(forwardprop(X, w1, w2), feed_dict={X: data})
- 
-        return(final_predict, values)
+            final_predict = sess.run(predict, feed_dict={X: data})
 
-def printPrediction(predictions, values):
+            values = sess.run(forwardprop(X, w1, w2), feed_dict={X: data})
+    
+    return(final_predict, values)
+
+def printPrediction(data, predictions, values):
     """ 
     Prints a list of int predictions using Alexa category names 
     Also prints other possible close categories
@@ -239,14 +249,31 @@ def printPrediction(predictions, values):
         std = np.std(theseVals)
         k = (theseVals[prediction]*1.0 - average)/std 
 
-        print(categoryNames[prediction] + " at %f sigma" % k)
+        softmax = np.exp(theseVals) / np.sum(np.exp(theseVals), axis=0)
 
+        prob = softmax[prediction] * 100
+
+        print(categoryNames[prediction] + " at %f sigma with %f probability" % (k, prob) )
+        
+        """
         for alternative in theseVals:
             if alternative > 0 and alternative != theseVals[prediction]:
                 index = np.where(theseVals == alternative)[0][0]
                 
                 altK = (alternative*1.0 - average)/std
                 print("Alternative: " + categoryNames[index] + " at %f sigma" % altK)
+        
+        print(np.exp(theseVals) / np.sum(np.exp(theseVals), axis=0))
+        """
+
+        
+        
+        
+        """
+        if softmax[5]>0.01 and softmax[6] > 0.01:
+            a, b = modelPrediction(data[counter, :], "model_normalizedClasses56-2800", MODELS_PATH, 6)
+            print(a)
+        """
 
         print("")
         
@@ -294,11 +321,11 @@ def main(fileName):
 
     # Categorise using the trained model
 
-    prediction, percentages = modelPrediction(all_X)
+    prediction, percentages = modelPrediction(all_X, MAIN_MODEL_NAME, MODELS_PATH, NUMBER_CLASSES_USED)
 
     # Print in friendly format
 
-    printPrediction(prediction, percentages)
+    printPrediction(all_X, prediction, percentages)
     
 
 

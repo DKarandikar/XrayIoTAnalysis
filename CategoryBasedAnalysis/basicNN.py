@@ -4,10 +4,16 @@ import numpy as np
 import pandas as pd 
 from sklearn.model_selection import train_test_split
 
-RANDOM_SEED = 83
-SAVE = True
 NUMBER_COLUMNS = 56
-FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalized.csv")
+DATA_FILENAME = "normalizedClasses56.csv"
+DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", DATA_FILENAME )
+
+MODEL_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models",  "model_" + DATA_FILENAME.split(".")[0])
+HIDDEN_NODES = 15
+SAVE = False
+SAVE_INTERVAL = 100
+
+RANDOM_SEED = 83
 
 tf.set_random_seed(RANDOM_SEED)
 
@@ -43,14 +49,10 @@ def confusionMatrix(real, pred):
 def get_data():
     """ Read the csv data set and split them into training and test sets """
 
-    df = pd.read_csv(FILE_PATH,
-            usecols = [x for x in range(2,NUMBER_COLUMNS)],
-            header=None)
+    df = pd.read_csv(DATA_FILE_PATH, usecols = [x for x in range(2,NUMBER_COLUMNS)], header=None)
     d = df.values
 
-    l = pd.read_csv(FILE_PATH,
-            usecols = [1], 
-            header = None)
+    l = pd.read_csv(DATA_FILE_PATH, usecols = [1], header = None)
     labels = l.values
 
     data = np.float32(d)
@@ -61,7 +63,7 @@ def get_data():
     # Data should be already min-max normalised
     #data /= np.max(np.abs(data)+0.0000001, axis=0)
 
-    print(data)
+    #print(data)
 
     # Prepend the column of 1s for bias
     N, M  = data.shape
@@ -72,17 +74,15 @@ def get_data():
     all_Y = np.zeros((target.size, target.max()+1))
     all_Y[np.arange(target.size), target] = 1
     train_X, test_X, train_y, test_y = train_test_split(all_X, all_Y, test_size=0.33, random_state=RANDOM_SEED)
-    #print(train_y)
     return train_X, test_X, train_y, test_y
 
 def main():
+    
     train_X, test_X, train_y, test_y = get_data()
-
-    #print(train_y)
 
     # Layer's sizes
     x_size = train_X.shape[1]   # Number of input nodes , which is NUMBER_COLUMNS - 2 + 1
-    h_size = 15                 # Number of hidden nodes
+    h_size = HIDDEN_NODES                 # Number of hidden nodes
     y_size = train_y.shape[1]   # Number of outcomes
 
     # Symbols
@@ -92,7 +92,6 @@ def main():
     # Weight initializations
     w_1 = init_weights((x_size, h_size))
     w_2 = init_weights((h_size, y_size))
-
     #w = init_weights((x_size, y_size))
 
     # Forward propagation
@@ -105,36 +104,32 @@ def main():
     updates = tf.train.GradientDescentOptimizer(0.01).minimize(cost)
 
     # Run SGD
-    sess = tf.Session()
-    saver = tf.train.Saver()
-    init = tf.global_variables_initializer()
-    sess.run(init)
+    with tf.Session() as sess:
+        saver = tf.train.Saver()
+        init = tf.global_variables_initializer()
+        sess.run(init)
 
-    print(sess.run(w_1))
-    print(sess.run(w_2))
+        for epoch in range(50000):
+            # Train with each example
+            for i in range(len(train_X)):
+                sess.run(updates, feed_dict={X: train_X[i: i + 1], y: train_y[i: i + 1]})
 
-    for epoch in range(50000):
-        # Train with each example
-        for i in range(len(train_X)):
-            sess.run(updates, feed_dict={X: train_X[i: i + 1], y: train_y[i: i + 1]})
+            train_accuracy = np.mean(np.argmax(train_y, axis=1) ==
+                                    sess.run(predict, feed_dict={X: train_X, y: train_y}))
+            test_accuracy  = np.mean(np.argmax(test_y, axis=1) ==
+                                    sess.run(predict, feed_dict={X: test_X, y: test_y}))
 
-        train_accuracy = np.mean(np.argmax(train_y, axis=1) ==
-                                 sess.run(predict, feed_dict={X: train_X, y: train_y}))
-        test_accuracy  = np.mean(np.argmax(test_y, axis=1) ==
-                                 sess.run(predict, feed_dict={X: test_X, y: test_y}))
+            print("Epoch = %d, train accuracy = %.2f%%, test accuracy = %.2f%%"
+                % (epoch + 1, 100. * train_accuracy, 100. * test_accuracy))
 
-        print("Epoch = %d, train accuracy = %.2f%%, test accuracy = %.2f%%"
-              % (epoch + 1, 100. * train_accuracy, 100. * test_accuracy))
+            if (epoch + 1)%SAVE_INTERVAL == 0 and SAVE:
+                saver.save(sess, MODEL_FILENAME, global_step=epoch+1)
+                #print(sess.run(w_1))
+                #print(sess.run(w_2))
 
-        if (epoch + 1)%100 == 0 and SAVE:
-            saver.save(sess, os.path.join(os.path.dirname(os.path.abspath(__file__)), "models",  "iter_model"), global_step=epoch+1)
-            #print(sess.run(w_1))
-            #print(sess.run(w_2))
+        final_predict = sess.run(predict, feed_dict={X: test_X, y: test_y})
+        final_train_predict = sess.run(predict, feed_dict={X: train_X, y: train_y})
 
-    final_predict = sess.run(predict, feed_dict={X: test_X, y: test_y})
-    final_train_predict = sess.run(predict, feed_dict={X: train_X, y: train_y})
-
-    sess.close()
     print("Seed: " + str(RANDOM_SEED))
 
     #print(np.argmax(test_y, axis=1))
@@ -144,9 +139,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    """
-    real = [1, 2, 3, 2, 1]
-    pred = [1, 2, 2, 3, 1]
-
-    print(confusionMatrix(real, pred))
-    """

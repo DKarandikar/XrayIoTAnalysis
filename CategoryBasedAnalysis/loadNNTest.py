@@ -7,7 +7,7 @@ from tensorflow.python.tools.inspect_checkpoint import print_tensors_in_checkpoi
 
 RANDOM_SEED = 83
 MODELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
-MODEL_META_FILENAME = "iter_model-500.meta"
+MODEL_META_FILENAME = "model_normalizedClasses56-2800.meta"
 
 NUMBER_COLUMNS = 56
 FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalized.csv")
