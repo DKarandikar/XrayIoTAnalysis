@@ -5,11 +5,11 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 NUMBER_COLUMNS = 56
-DATA_FILENAME = "normalizedClasses56.csv"
+DATA_FILENAME = "normalized.csv"
 DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", DATA_FILENAME )
 
 MODEL_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models",  "model_" + DATA_FILENAME.split(".")[0])
-HIDDEN_NODES = 15
+HIDDEN_NODES = 30
 SAVE = False
 SAVE_INTERVAL = 100
 
@@ -28,7 +28,7 @@ def forwardprop(X, w_1, w_2):
     IMPORTANT: yhat is not softmax since TensorFlow's softmax_cross_entropy_with_logits() does that internally.
     """
     h    = tf.nn.sigmoid(tf.matmul(X, w_1))  # The \sigma function
-    drop_out = tf.nn.dropout(h, 0.75)
+    relu = tf.nn.relu(h)
     yhat = tf.matmul(h, w_2)  # The \varphi function
     return yhat
 
@@ -109,7 +109,7 @@ def main():
         init = tf.global_variables_initializer()
         sess.run(init)
 
-        for epoch in range(50000):
+        for epoch in range(500):
             # Train with each example
             for i in range(len(train_X)):
                 sess.run(updates, feed_dict={X: train_X[i: i + 1], y: train_y[i: i + 1]})

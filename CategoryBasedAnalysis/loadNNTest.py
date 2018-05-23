@@ -7,7 +7,7 @@ from tensorflow.python.tools.inspect_checkpoint import print_tensors_in_checkpoi
 
 RANDOM_SEED = 83
 MODELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
-MODEL_META_FILENAME = "model_normalizedClasses56-2800.meta"
+MODEL_META_FILENAME = "iter_model-7800.meta"
 
 NUMBER_COLUMNS = 56
 FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalized.csv")
@@ -32,7 +32,7 @@ def forwardprop(X, w_1, w_2):
 def confusionMatrix(real, pred):
     num_classes = np.max(real)
     matrix = np.zeros((num_classes, num_classes))
-    print(matrix.shape)
+    #print(matrix.shape)
     for x in range(len(pred)):
         matrix[pred[x]-1, real[x]-1] += 1
     return matrix
@@ -78,7 +78,7 @@ def main():
     #print_tensors_in_checkpoint_file(file_name=os.path.join(MODELS_PATH, "iter_model-15500"), tensor_name = '', all_tensors=False)
     
     with tf.Session() as sess:
-        imported_meta.restore(sess, tf.train.latest_checkpoint(MODELS_PATH))
+        imported_meta.restore(sess, os.path.join(MODELS_PATH, MODEL_META_FILENAME.split(".")[0]))
         graph = tf.get_default_graph()
 
         w1 = graph.get_tensor_by_name("Variable:0")
@@ -87,7 +87,7 @@ def main():
         train_X, test_X, train_y, test_y = get_data()
 
         #np.set_printoptions(threshold=np.inf)
-        print(test_X)
+        #print(test_X)
 
         # Layer's sizes
         x_size = train_X.shape[1]   # Number of input nodes 
