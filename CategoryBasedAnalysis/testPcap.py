@@ -4,10 +4,6 @@ import pandas as pd
 import tensorflow as tf
 import numpy as np
 
-"""
-Will need to get all bursts, then flows
-then test on the NN
-"""
 
 BURST_PACKET_NO_CUTOFF = 60
 BURST_TIME_INTERVAL = 1.0
@@ -15,18 +11,17 @@ FLOW_SIZE_CUTOFF = 10   # Minimum number of packets to be counted as a valid flo
 
 MODELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
 TRAINED_MODEL_META = os.path.join(MODELS_PATH, "iter_model-7800.meta")
-FEATURES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "FlowFeatures.csv")
 NUMBER_HIDDEN_NODES_USED = 15
 NUMBER_CLASSES_USED = 8
 
 GETINPUT = False
-TEST_FILENAME = "AlexaTest1"
+TEST_FILENAME = "AlexaDayofWeek1"
 
 DEVICE_IP = "192.168.4.2"
 
-NUMBER_COLUMNS = 56
-
+FEATURES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "FlowFeatures.csv")
 DF = pd.read_csv(FEATURES_FILE, usecols = [x for x in range(2,NUMBER_COLUMNS)], header=None)
+NUMBER_COLUMNS = 56
 
 def normaliseColumn(array, colNo):
     """
@@ -224,85 +219,88 @@ def modelPrediction(data):
 
         final_predict = sess.run(predict, feed_dict={X: data})
 
-        return final_predict
+        values = sess.run(forwardprop(X, w1, w2), feed_dict={X: data})
+ 
+        return(final_predict, values)
 
-def printPrediction(listInt):
-    """ Prints a prediction using Alexa category names """
-    for x in listInt:
-        if x == 1: 
-            print("Time")
-        elif x == 2:
-            print("Weather")
-        elif x == 3:
-            print("Joke")
-        elif x == 4:
-            print("Song author")
-        elif x == 5:
-            print("Conversion")
-        elif x == 6:
-            print("Day of week")
-        elif x == 7:
-            print("Timer")
-        elif x == 8:
-            print("Shopping")
+def printPrediction(predictions, values):
+    """ 
+    Prints a list of int predictions using Alexa category names 
+    Also prints other possible close categories
+    """
+    categoryNames = {1: "Time", 2: "Weather", 3: "Joke", 4: "Song Author", 5: "Conversion", 6: "Day of week", 7: "Timer", 8: "Shopping"}
+
+    for counter, prediction in np.ndenumerate(predictions):
         
-    
+        theseVals = values[counter]
+        #print(theseVals)
+
+        average = np.mean(theseVals)
+        std = np.std(theseVals)
+        k = (theseVals[prediction]*1.0 - average)/std 
+
+        print(categoryNames[prediction] + " at %f sigma" % k)
+
+        for alternative in theseVals:
+            if alternative > 0 and alternative != theseVals[prediction]:
+                index = np.where(theseVals == alternative)[0][0]
+                
+                altK = (alternative*1.0 - average)/std
+                print("Alternative: " + categoryNames[index] + " at %f sigma" % altK)
+
+        print("")
+        
 
 def main(fileName):
-    try:
-        ### Get all bursts of sufficient size
 
-        pkts =  pyshark.FileCapture(os.path.join(os.path.dirname(os.path.abspath(__file__)), "pcaps", fileName))
+    # Get all bursts of sufficient size
 
-        bursts = getBursts(pkts)
+    pkts =  pyshark.FileCapture(os.path.join(os.path.dirname(os.path.abspath(__file__)), "pcaps", fileName))
 
-        ### Seprate out all the flows
+    bursts = getBursts(pkts)
 
-        flowStatistics = []
+    # Seprate out all the flows and get stats 
 
-        for burst in bursts:
+    flowStatistics = []
 
-            # Get all IP sources and dests
+    for burst in bursts:
 
-            srcdest = getIps(burst)
+        # Get all IP sources and dests
 
-            #print(srcdest)
+        srcdest = getIps(burst)
 
-            # Get lengths of flows
+        # Get lengths of flows
 
-            flowLengths = getFlowDict(srcdest, burst)
+        flowLengths = getFlowDict(srcdest, burst)
 
-            # Get statistics for each flow
+        # Get statistics for each flow
 
-            flowStatistics.extend(getStatisticsFromDict(flowLengths, srcdest, flowLengths))
+        flowStatistics.extend(getStatisticsFromDict(flowLengths, srcdest, flowLengths))
 
-        validFlows = checkNan(flowStatistics)
+    # Check for Not a Number issues (probably unnecessary now)
 
-        # Normalise the data by columns
-        #print(validFlows)
+    validFlows = checkNan(flowStatistics)
 
-        data = np.array(validFlows, dtype='float32')
+    # Normalise the data by columns
 
-        for x in range(NUMBER_COLUMNS-2):
-            data = normaliseColumn(data, x)
+    data = np.array(validFlows, dtype='float32')
 
+    for x in range(NUMBER_COLUMNS-2):
+        data = normaliseColumn(data, x)
 
-        # Setup the model
+    # Setup the model
 
-        all_X = addBiases(data)
+    all_X = addBiases(data)
 
-        # Categorise using the trained model
+    # Categorise using the trained model
 
-        prediction = modelPrediction(all_X)
+    prediction, percentages = modelPrediction(all_X)
 
-        # Print in friendly format
+    # Print in friendly format
 
-        printPrediction(prediction)
+    printPrediction(prediction, percentages)
     
-    except:
-        pass
 
-    
 
 if __name__ == '__main__':
     if GETINPUT:
