@@ -1,10 +1,9 @@
 ## Pipeline
 
-1. Get `.pcap` bursts and place in bursts/
+1. Get `.pcap` bursts and place in bursts/ (or else get `pcaps` and run `PcapBurstification.py`)
 2. Run `BurstFlowFeatureExtraction.py` to get all flow data in `flowFeatures.csv` (this is the one that takes time)
-3. (NO Longer Required) Run `RemoveNonBiDirectionalFlows.py` to remove any flows that don't form a conversation, and thus remove any `nan` issues
-4. Run `normaliseData.py` to min/max normalize all columns into [0,1]
-5. Run the `basicNN.py` to train on the extracted flows
+3. Run `normaliseData.py` to min/max normalize all columns into [0,1]
+4. Run the `basicNN.py` to train on the extracted flows
 
 ## Categories
 

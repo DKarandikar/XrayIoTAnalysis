@@ -18,7 +18,7 @@ NUMBER_HIDDEN_NODES_USED = 15
 NUMBER_CLASSES_USED = 8
 
 GETINPUT = False
-TEST_FILENAME = "AlexaTest1"
+TEST_FILENAME = "AlexaTest3"
 
 DEVICE_IP = "192.168.4.2"
 
@@ -253,16 +253,16 @@ def printPrediction(data, predictions, values):
 
         prob = softmax[prediction] * 100
 
-        print(categoryNames[prediction] + " at %f sigma with %f probability" % (k, prob) )
+        print(categoryNames[prediction] + " at %f sigma with %f%% probability " % (k, prob) )
         
-        """
+        
         for alternative in theseVals:
             if alternative > 0 and alternative != theseVals[prediction]:
                 index = np.where(theseVals == alternative)[0][0]
                 
                 altK = (alternative*1.0 - average)/std
                 print("Alternative: " + categoryNames[index] + " at %f sigma" % altK)
-        
+        """
         print(np.exp(theseVals) / np.sum(np.exp(theseVals), axis=0))
         """
 

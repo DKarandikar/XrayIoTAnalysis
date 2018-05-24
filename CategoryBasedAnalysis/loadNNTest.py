@@ -7,7 +7,7 @@ from tensorflow.python.tools.inspect_checkpoint import print_tensors_in_checkpoi
 
 RANDOM_SEED = 83
 MODELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
-MODEL_META_FILENAME = "iter_model-7800.meta"
+MODEL_META_FILENAME = "model_normalized-500.meta"
 
 NUMBER_COLUMNS = 56
 FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalized.csv")
@@ -81,8 +81,8 @@ def main():
         imported_meta.restore(sess, os.path.join(MODELS_PATH, MODEL_META_FILENAME.split(".")[0]))
         graph = tf.get_default_graph()
 
-        w1 = graph.get_tensor_by_name("Variable:0")
-        w2 = graph.get_tensor_by_name("Variable_1:0")
+        w1 = graph.get_tensor_by_name("weights1:0")
+        w2 = graph.get_tensor_by_name("weights2:0")
 
         train_X, test_X, train_y, test_y = get_data()
 

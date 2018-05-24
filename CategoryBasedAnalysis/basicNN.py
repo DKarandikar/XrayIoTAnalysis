@@ -10,17 +10,18 @@ DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data"
 
 MODEL_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models",  "model_" + DATA_FILENAME.split(".")[0])
 HIDDEN_NODES = 30
-SAVE = False
+SAVE = True
 SAVE_INTERVAL = 100
+TOTAL_EPOCHS = 500
 
 RANDOM_SEED = 83
 
 tf.set_random_seed(RANDOM_SEED)
 
-def init_weights(shape):
+def init_weights(shape, varName):
     """ Weight initialization """
     weights = tf.random_normal(shape, stddev=0.1)
-    return tf.Variable(weights)
+    return tf.Variable(weights, name = varName)
 
 def forwardprop(X, w_1, w_2):
     """
@@ -29,7 +30,7 @@ def forwardprop(X, w_1, w_2):
     """
     h    = tf.nn.sigmoid(tf.matmul(X, w_1))  # The \sigma function
     relu = tf.nn.relu(h)
-    yhat = tf.matmul(h, w_2)  # The \varphi function
+    yhat = tf.matmul(relu, w_2)  # The \varphi function
     return yhat
 
 def model(X, w):
@@ -90,8 +91,8 @@ def main():
     y = tf.placeholder("float", shape=[None, y_size])
 
     # Weight initializations
-    w_1 = init_weights((x_size, h_size))
-    w_2 = init_weights((h_size, y_size))
+    w_1 = init_weights((x_size, h_size), "weights1")
+    w_2 = init_weights((h_size, y_size), "weights2")
     #w = init_weights((x_size, y_size))
 
     # Forward propagation
@@ -109,7 +110,7 @@ def main():
         init = tf.global_variables_initializer()
         sess.run(init)
 
-        for epoch in range(500):
+        for epoch in range(TOTAL_EPOCHS):
             # Train with each example
             for i in range(len(train_X)):
                 sess.run(updates, feed_dict={X: train_X[i: i + 1], y: train_y[i: i + 1]})

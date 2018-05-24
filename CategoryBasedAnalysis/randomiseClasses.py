@@ -4,7 +4,7 @@ if os.path.isfile(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data
     os.remove(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "randomised.csv"))
 
 with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "randomised.csv"),'a') as cleanFile:
-    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "noNonBiDirect.csv"),"r") as feat:
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalized.csv"),"r") as feat:
         features = csv.reader(feat)
         randomed = csv.writer(cleanFile)
 
