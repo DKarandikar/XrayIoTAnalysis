@@ -1,5 +1,5 @@
 import tensorflow as tf
-import random, os
+import random, os, pickle
 import numpy as np
 import pandas as pd 
 from sklearn.model_selection import train_test_split
@@ -9,10 +9,10 @@ DATA_FILENAME = "normalized.csv"
 DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", DATA_FILENAME )
 
 MODEL_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models",  "model_" + DATA_FILENAME.split(".")[0])
-HIDDEN_NODES = 30
+HIDDEN_NODES = 20
 SAVE = True
-SAVE_INTERVAL = 100
-TOTAL_EPOCHS = 500
+SAVE_INTERVAL = 200
+TOTAL_EPOCHS = 100000
 
 RANDOM_SEED = 83
 
@@ -23,17 +23,18 @@ def init_weights(shape, varName):
     weights = tf.random_normal(shape, stddev=0.1)
     return tf.Variable(weights, name = varName)
 
-def forwardprop(X, w_1, w_2):
+def forwardprop(X, w_1, w_2, keep_prob):
     """
     Forward-propagation
     IMPORTANT: yhat is not softmax since TensorFlow's softmax_cross_entropy_with_logits() does that internally.
     """
     h    = tf.nn.sigmoid(tf.matmul(X, w_1))  # The \sigma function
     relu = tf.nn.relu(h)
-    yhat = tf.matmul(relu, w_2)  # The \varphi function
+    dropout = tf.nn.dropout(relu, keep_prob)
+    yhat = tf.matmul(dropout, w_2)  # The \varphi function
     return yhat
 
-def model(X, w):
+def basicModel(X, w):
     """ A simpler model for use sometimes """
     yhat = tf.matmul(X, w)
     return yhat
@@ -74,7 +75,7 @@ def get_data():
     # Convert into one-hot vectors
     all_Y = np.zeros((target.size, target.max()+1))
     all_Y[np.arange(target.size), target] = 1
-    train_X, test_X, train_y, test_y = train_test_split(all_X, all_Y, test_size=0.33, random_state=RANDOM_SEED)
+    train_X, test_X, train_y, test_y = train_test_split(all_X, all_Y, test_size=0.2, random_state=RANDOM_SEED)
     return train_X, test_X, train_y, test_y
 
 def main():
@@ -96,13 +97,16 @@ def main():
     #w = init_weights((x_size, y_size))
 
     # Forward propagation
-    yhat    = forwardprop(X, w_1, w_2)
-    #yhat = model(X, w)
+    keep_prob = tf.placeholder_with_default(1.0, shape=())
+    yhat    = forwardprop(X, w_1, w_2, keep_prob)
     predict = tf.argmax(yhat, axis=1)
 
     # Backward propagation
     cost    = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=yhat))
     updates = tf.train.GradientDescentOptimizer(0.01).minimize(cost)
+
+    trainAccuracy = []
+    testAccuracy = []
 
     # Run SGD
     with tf.Session() as sess:
@@ -113,20 +117,23 @@ def main():
         for epoch in range(TOTAL_EPOCHS):
             # Train with each example
             for i in range(len(train_X)):
-                sess.run(updates, feed_dict={X: train_X[i: i + 1], y: train_y[i: i + 1]})
+                sess.run(updates, feed_dict={X: train_X[i: i + 1], y: train_y[i: i + 1], keep_prob: 0.9})
 
             train_accuracy = np.mean(np.argmax(train_y, axis=1) ==
-                                    sess.run(predict, feed_dict={X: train_X, y: train_y}))
+                                    sess.run(predict, feed_dict={X: train_X, y: train_y, keep_prob: 1}))
             test_accuracy  = np.mean(np.argmax(test_y, axis=1) ==
-                                    sess.run(predict, feed_dict={X: test_X, y: test_y}))
+                                    sess.run(predict, feed_dict={X: test_X, y: test_y, keep_prob: 1}))
 
             print("Epoch = %d, train accuracy = %.2f%%, test accuracy = %.2f%%"
                 % (epoch + 1, 100. * train_accuracy, 100. * test_accuracy))
 
+            testAccuracy.append(100. * train_accuracy)
+            trainAccuracy.append(100. * test_accuracy)
+
             if (epoch + 1)%SAVE_INTERVAL == 0 and SAVE:
                 saver.save(sess, MODEL_FILENAME, global_step=epoch+1)
-                #print(sess.run(w_1))
-                #print(sess.run(w_2))
+                pickle.dump(testAccuracy, open('testAccuracies.p','wb'))
+                pickle.dump(trainAccuracy, open('trainAccuracies.p','wb'))
 
         final_predict = sess.run(predict, feed_dict={X: test_X, y: test_y})
         final_train_predict = sess.run(predict, feed_dict={X: train_X, y: train_y})

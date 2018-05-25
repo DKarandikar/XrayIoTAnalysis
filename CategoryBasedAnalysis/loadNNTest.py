@@ -1,5 +1,5 @@
 import tensorflow as tf
-import random, os
+import random, os, pickle
 import numpy as np
 import pandas as pd 
 from sklearn.model_selection import train_test_split
@@ -7,10 +7,13 @@ from tensorflow.python.tools.inspect_checkpoint import print_tensors_in_checkpoi
 
 RANDOM_SEED = 83
 MODELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
-MODEL_META_FILENAME = "model_normalized-500.meta"
+MODEL_META_FILENAME = "model_normalized-1400.meta"
+NUMBER_HIDDEN_NODES = 20
 
 NUMBER_COLUMNS = 56
 FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalized.csv")
+
+PICKLE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "liveCapFiles")
 
 tf.set_random_seed(RANDOM_SEED)
 
@@ -19,14 +22,15 @@ def init_weights(shape):
     weights = tf.random_normal(shape, stddev=0.1)
     return tf.Variable(weights)
 
-def forwardprop(X, w_1, w_2):
+def forwardprop(X, w_1, w_2, keep_prob):
     """
-    Forward-propagation.
+    Forward-propagation
     IMPORTANT: yhat is not softmax since TensorFlow's softmax_cross_entropy_with_logits() does that internally.
     """
     h    = tf.nn.sigmoid(tf.matmul(X, w_1))  # The \sigma function
-    drop_out = tf.nn.dropout(h, 0.75)
-    yhat = tf.matmul(h, w_2)  # The \varphi function
+    relu = tf.nn.relu(h)
+    dropout = tf.nn.dropout(relu, keep_prob)
+    yhat = tf.matmul(dropout, w_2)  # The \varphi function
     return yhat
 
 def confusionMatrix(real, pred):
@@ -91,13 +95,14 @@ def main():
 
         # Layer's sizes
         x_size = train_X.shape[1]   # Number of input nodes 
-        h_size = 15                 # Number of hidden nodes
+        h_size = NUMBER_HIDDEN_NODES                # Number of hidden nodes
         y_size = train_y.shape[1]   # Number of outcomes
          
         X = tf.placeholder("float", shape=[None, x_size])
         y = tf.placeholder("float", shape=[None, y_size])
 
-        predict = tf.argmax(forwardprop(X, w1, w2), axis=1)
+        keep_prob = 1
+        predict = tf.argmax(forwardprop(X, w1, w2, keep_prob), axis=1)
 
         final_predict = sess.run(predict, feed_dict={X: test_X})
 
@@ -113,6 +118,12 @@ def main():
         #print(final_predict)
 
         print(confusionMatrix(np.argmax(test_y, axis=1), final_predict))
+
+        weights1 = np.array(sess.run(w1))
+        weights2 = np.array(sess.run(w2))
+
+        np.save(os.path.join(PICKLE_PATH, "weights1"), weights1)
+        np.save(os.path.join(PICKLE_PATH, "weights2"), weights2)
 
 
 if __name__ == '__main__':
