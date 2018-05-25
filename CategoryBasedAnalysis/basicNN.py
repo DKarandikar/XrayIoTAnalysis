@@ -1,20 +1,35 @@
 import tensorflow as tf
-import random, os, pickle
+import random, os, pickle, sys
 import numpy as np
 import pandas as pd 
 from sklearn.model_selection import train_test_split
 
 NUMBER_COLUMNS = 56
 DATA_FILENAME = "normalized.csv"
+SAVE = False
+PICKLE_ACCURACIES = True
+
+try:
+    if sys.argv[1] == "incOnly":
+        NUMBER_COLUMNS = 20
+        DATA_FILENAME = "onlyIncoming.csv"
+        SAVE=True
+        PICKLE_ACCURACIES = False
+        print("Incoming Packets Model")
+except:
+    pass
+
+
 DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", DATA_FILENAME )
 
 MODEL_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models",  "model_" + DATA_FILENAME.split(".")[0])
 HIDDEN_NODES = 20
-SAVE = True
 SAVE_INTERVAL = 200
 TOTAL_EPOCHS = 100000
 
 RANDOM_SEED = 83
+
+
 
 tf.set_random_seed(RANDOM_SEED)
 
@@ -132,8 +147,9 @@ def main():
 
             if (epoch + 1)%SAVE_INTERVAL == 0 and SAVE:
                 saver.save(sess, MODEL_FILENAME, global_step=epoch+1)
-                pickle.dump(testAccuracy, open('testAccuracies.p','wb'))
-                pickle.dump(trainAccuracy, open('trainAccuracies.p','wb'))
+                if PICKLE_ACCURACIES:
+                    pickle.dump(testAccuracy, open('testAccuracies.p','wb'))
+                    pickle.dump(trainAccuracy, open('trainAccuracies.p','wb'))
 
         final_predict = sess.run(predict, feed_dict={X: test_X, y: test_y})
         final_train_predict = sess.run(predict, feed_dict={X: train_X, y: train_y})

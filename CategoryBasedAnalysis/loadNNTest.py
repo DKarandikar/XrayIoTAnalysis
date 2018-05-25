@@ -1,5 +1,5 @@
 import tensorflow as tf
-import random, os, pickle
+import random, os, pickle, sys
 import numpy as np
 import pandas as pd 
 from sklearn.model_selection import train_test_split
@@ -10,8 +10,23 @@ MODELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
 MODEL_META_FILENAME = "model_normalized-1400.meta"
 NUMBER_HIDDEN_NODES = 20
 
+DATA_FILENAME = "normalized.csv"
 NUMBER_COLUMNS = 56
-FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalized.csv")
+NP_SAVE = True
+
+try:
+    if sys.argv[1] == "incOnly":
+        NUMBER_COLUMNS = 20
+        DATA_FILENAME = "onlyIncoming.csv"
+        NP_SAVE = False
+        MODEL_META_FILENAME = "model_onlyIncoming-400.meta"
+        print("Incoming Packets Model")
+except:
+    print("Except")
+    pass
+
+
+FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  DATA_FILENAME)
 
 PICKLE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "liveCapFiles")
 
@@ -121,9 +136,9 @@ def main():
 
         weights1 = np.array(sess.run(w1))
         weights2 = np.array(sess.run(w2))
-
-        np.save(os.path.join(PICKLE_PATH, "weights1"), weights1)
-        np.save(os.path.join(PICKLE_PATH, "weights2"), weights2)
+        if NP_SAVE:
+            np.save(os.path.join(PICKLE_PATH, "weights1"), weights1)
+            np.save(os.path.join(PICKLE_PATH, "weights2"), weights2)
 
 
 if __name__ == '__main__':
