@@ -6,7 +6,7 @@ BURSTS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bursts")
 try:
         a = rdpcap(os.path.join(PCAPS_PATH, sys.argv[1]))
 except:
-        Print("Please give a filename as argument")
+        print("Please give a filename as argument")
 
 nextPcap = []
 times = []

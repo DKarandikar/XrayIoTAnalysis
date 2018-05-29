@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 
 NUMBER_COLUMNS = 56
 DATA_FILENAME = "normalized.csv"
-SAVE = False
+SAVE = True
 PICKLE_ACCURACIES = True
 
 try:
@@ -24,7 +24,7 @@ DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data"
 
 MODEL_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models",  "model_" + DATA_FILENAME.split(".")[0])
 HIDDEN_NODES = 20
-SAVE_INTERVAL = 200
+SAVE_INTERVAL = 1000
 TOTAL_EPOCHS = 100000
 
 RANDOM_SEED = 83
