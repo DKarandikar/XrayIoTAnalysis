@@ -1,154 +1,181 @@
-import os, csv, _thread, threading, asyncio, tkinter, time, pickle
-import numpy as np
-import pandas as pd
+import threading, asyncio, tkinter, time, json, os
 import pyshark
-from tkinter import Tk, RIGHT, BOTH, RAISED, LEFT
 from tkinter.ttk import Frame, Button, Style, Scrollbar
 from collections import defaultdict
-from scapy.all import *
 
-PCAPS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pcaps")
+import infoBar, packetProcessing, inforBarHeadings
 
-INTERFACE_NAME = r"\Device\NPF_{5DB2AC8D-8B1C-46CD-8217-721669155FF0}"
-INTERFACE_NAME = '2'
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),"config.json")) as f:
+    data = json.load(f)
 
-HOME_NET_PREFIX = "192.168.1"
+    INTERFACE_NAME = data["interface_name"]
+    HOME_NET_PREFIX = data["home_ip"]
+    summaries = data["only_summaries"] == True
+    
+PACKET_LABEL_TEXT = "Total packets so far: "
 
-"""
-for packet in capture.sniff_continuously():
-    print(packet)
-"""
-
-
-capture = pyshark.LiveCapture(interface=INTERFACE_NAME, only_summaries=False)
-
-class InfoBar(Frame):
-    def __init__(self, parent, keyLabel, *args, **kwargs):
-        Frame.__init__(self, parent)
-        self.label = tkinter.Label(self, text=keyLabel)
-        self.text1 = tkinter.Entry(self)
-        self.text2 = tkinter.Entry(self)
-        self.button1 = Button(self, text="Save", command=lambda: parent.saveCaptures(keyLabel, self.text1.get(), self.text2.get()))
-
-        self.label.pack(side=LEFT)
-        self.text1.pack(side=LEFT)
-        self.text2.pack(side=LEFT)
-        self.button1.pack(side=LEFT)
-
-        self.name = keyLabel
+capture = pyshark.LiveCapture(interface=INTERFACE_NAME, only_summaries=summaries)
 
 class Capturing(Frame):
     
-    def saveCaptures(self, IP, device, action):
+    def saveCaptureButtonFUN(self, IP, device, action):
+        """
+        Saves the packets stored since start or last save for the ip IP
+        and records device name and action from Entry Boxes
+        """
         self.saving = True
-        counter = 0
-        while True:
-            if os.path.isfile(os.path.join(PCAPS_PATH, device + action + counter + ".p")):
-                counter += 1
-            else:
+        self.IPDict = packetProcessing.savingPackets(IP, device, action, self.IPDict)
+        self.saving = False
+
+    def resetButtonFUN(self, IP, device, action):
+        """
+        Clears the IP packets and removes the row
+        """
+        self.saving = True
+        self.IPDict.pop(IP, None)
+        for infobar in self.infobars:
+            if infobar.name == IP:
+                self.infobars.remove(infobar)
+                infobar.pack_forget()
                 break
-        pickle.dump(self.IPDict[IP], open(os.path.join(PCAPS_PATH, device + action + counter + ".p"), "wb") )
+        
         self.saving = False
     
-    def start(self, click):
+    def startButtonFUN(self, click):
+        """
+        Starts scanning and updating the UI
+        """
         if click:
             self.wantToSniff = True
 
-        if self.running:
-            self.tick()
-            self.after(50,lambda: self.start(False))
+        self.tick()
+        self.after(50,lambda: self.startButtonFUN(False))
     
-    def stop(self):
+    def stopButtonFUN(self):
+        """
+        Tells pyshark to stop scanning
+        """
         self.wantToSniff = False
   
     def __init__(self):
+        """
+        Setup all the class variables 
+        """
         super().__init__()   
 
-        self.running = True
         self.wantToSniff = False
         self.Sniffing = False
 
         self.IPDict = defaultdict(list)
         self.infobars = []
 
-        self.first = True
         self.saving = False
 
-        self.packetCount = tkinter.IntVar()
-        self.packetCount.set(0)
+        self.packetCountStringVar = tkinter.StringVar()
+        self.packetCountStringVar.set(PACKET_LABEL_TEXT)
+        self.packetCount = 0
 
         # Do this last
-        self.updateUI()
+        self.initUI()
 
-    def updateUI(self):
-      
-        self.master.title("Buttons")
+    def initUI(self):
+        """
+        Sets up the initial UI componenents
+        These are the ones that won't change during use
+        """
+        
+        self.master.title("Packet Capture")
         self.style = Style()
         self.style.theme_use("default")
 
-        if self.first:
-            tkinter.Label(self, textvariable=self.packetCount).pack()
+        tkinter.Label(self, textvariable=self.packetCountStringVar).grid(row=0, column=0, columnspan=2)
 
+        separator = Frame(self, height=2, relief=tkinter.SUNKEN)
+        separator.grid(row=1, column=0, columnspan=2)  
+
+        self.infoBarFrame = tkinter.Frame(self)
+        self.infoBarFrame.grid(row=2, column=0, columnspan=2, padx=5, pady=20)
+
+        headings = inforBarHeadings.InfoBarHeadings(self.infoBarFrame)
+        headings.pack(side="top", fill=tkinter.BOTH, expand=False)
+ 
+        stopButton = Button(self, text="Stop Scan", command=self.stopButtonFUN)
+        stopButton.grid(row=3, column=1)
+        startButton = Button(self, text="Start Scan", command=lambda: self.startButtonFUN(True))
+        startButton.grid(row=3, column=0)
+
+        self.pack()
+    
+        self.updateUI()
+
+    def updateUI(self):
+        """
+        Updates the UI components that change as it goes along
+        """
+        
+        # Loop through all IP addresses
         for key in self.IPDict.keys():
             ignore = False
-            for frame in self.infobars:
-                if frame.name == key:
+
+            # Check if we already have an infobar for that IP 
+            for infobar in self.infobars:
+                if infobar.name == key:
+                    infobar.updatePacketCount(len(self.IPDict[key]))
                     ignore = True
+
+            # If we don't, make a new one and add it
             if not ignore:
-                frame = InfoBar(self, key, relief=RAISED, borderwidth=1)
-                self.infobars.append(frame)
-                frame.pack(side="top", fill=BOTH, expand=True)
+                infobar = infoBar.InfoBar(self.infoBarFrame, self, key, relief=tkinter.RAISED, borderwidth=1)
+                self.infobars.append(infobar)
+                infobar.pack(side="top", fill=tkinter.BOTH, expand=False)
+      
         
-        self.pack(fill=BOTH, expand=True)
-
-        if self.first:
-        
-            stopButton = Button(self, text="Stop Scan", command=self.stop)
-            stopButton.pack(side=RIGHT, padx=5, pady=5)
-            startButton = Button(self, text="Start Scan", command=lambda: self.start(True))
-            startButton.pack(side=RIGHT)
-    
-        # Do this last
-        self.first = False
-
     def packetSniff(self):
+        """
+        Sniffing method that runs on another thread
+        Runs forever until the stop button is pressed
+        """
+
+        # Have to do this to keep pyshark happy
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         capture.setup_eventloop()
 
-        for packet in capture.sniff_continuously(packet_count=100):
-            self.processPacket(packet)
-            self.packetCount.set(self.packetCount.get() + 1)
+        for packet in capture.sniff_continuously():
+            # Don't want to mess when saving to avoid race conditions
+            while self.saving:
+                time.sleep(1)
+            self.IPDict = packetProcessing.processPacket(packet, self.IPDict)
+            self.packetCount += 1
+            self.packetCountStringVar.set(PACKET_LABEL_TEXT + str(self.packetCount))
+
+            if not self.wantToSniff:
+                break
         
         self.Sniffing = False
 
     def tick(self):
+        """
+        Tick that runs every 50ms
+        Calls the sniffing thread if necessary, and otherwise just updates UI
+        """
         if not self.Sniffing and self.wantToSniff:
             threading.Thread.__init__(self)
             t = threading.Thread( target=self.packetSniff, name="Sniffing")
             t.start()
             self.Sniffing = True
-            
+
+        self.updateUI()
 
         #print(self.IPDict)
-        self.updateUI()
         
-    def processPacket(self, packet):
-        while self.saving:
-            time.sleep(1)
-        try:
-            if HOME_NET_PREFIX in packet.ip.src:
-                self.IPDict[packet.ip.src].append(packet)
-        except AttributeError:
-            # This can happen if a packet has no IP layer
-            # We will just ignore packets like this
-            print("Attribute Error")
+
             
 
 def main():
   
-    root = Tk()
-    root.geometry("800x600+300+300")
+    root = tkinter.Tk()
+    root.geometry("580x400+300+300")
     app = Capturing()
     root.mainloop()  
 
