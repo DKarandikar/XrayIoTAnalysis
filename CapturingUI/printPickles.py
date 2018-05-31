@@ -1,7 +1,7 @@
 import os, pickle
 
 
-PCAPS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pcaps")
+PCAPS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pickledPackets30-5-2018")
 
 f = []
 for (dirpath, dirnames, filenames) in os.walk(PCAPS_PATH):

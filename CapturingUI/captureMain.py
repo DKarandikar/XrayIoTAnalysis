@@ -10,7 +10,7 @@ with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),"config.json")
 
     INTERFACE_NAME = data["interface_name"]
     HOME_NET_PREFIX = data["home_ip"]
-    summaries = data["only_summaries"] == True
+    summaries = data["only_summaries"] == "True"
     
 PACKET_LABEL_TEXT = "Total packets so far: "
 
@@ -29,16 +29,12 @@ class Capturing(Frame):
 
     def resetButtonFUN(self, IP, device, action):
         """
-        Clears the IP packets and removes the row
+        Clears the IP packets for that row
         """
         self.saving = True
         self.IPDict.pop(IP, None)
-        for infobar in self.infobars:
-            if infobar.name == IP:
-                self.infobars.remove(infobar)
-                infobar.pack_forget()
-                break
-        
+        infobar = self.getInfobar(IP)
+        infobar.updatePacketCount(0)
         self.saving = False
     
     def startButtonFUN(self, click):
@@ -167,7 +163,11 @@ class Capturing(Frame):
 
         self.updateUI()
 
-        #print(self.IPDict)
+    def getInfobar(self, IP):
+        """ Gets infobar for IP """
+        for infobar in self.infobars:
+            if infobar.name == IP:
+                return infobar
         
 
             

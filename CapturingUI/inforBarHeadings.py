@@ -9,7 +9,7 @@ class InfoBarHeadings(Frame):
         self.label2 = tkinter.Label(self, text="Device Name")
         self.label3 = tkinter.Label(self, text="Action Name")
         self.label4 = tkinter.Label(self, text="Save/Reset?")
-        self.label5 = tkinter.Label(self, text="Packets So Far")
+        self.label5 = tkinter.Label(self, text="Packets Unsaved")
         
 
         self.label.pack(side=LEFT)
