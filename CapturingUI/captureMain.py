@@ -24,7 +24,7 @@ class Capturing(Frame):
         and records device name and action from Entry Boxes
         """
         self.saving = True
-        self.IPDict = packetProcessing.savingPackets(IP, device, action, self.IPDict)
+        self.IPDict = packetProcessing.savingPackets(IP, device, action, self.IPDict, self.messageLabel)
         self.saving = False
 
     def resetButtonFUN(self, IP, device, action):
@@ -92,7 +92,7 @@ class Capturing(Frame):
         self.style = Style()
         self.style.theme_use("default")
 
-        tkinter.Label(self, textvariable=self.packetCountStringVar).grid(row=0, column=0, columnspan=2)
+        tkinter.Label(self, textvariable=self.packetCountStringVar).grid(row=0, column=0, columnspan=6)
 
         separator = Frame(self, height=2, relief=tkinter.SUNKEN)
         separator.grid(row=1, column=0, columnspan=2)  
@@ -105,9 +105,12 @@ class Capturing(Frame):
         headings.label5.grid(column=5, row=2)
  
         stopButton = Button(self, text="Stop Scan", command=self.stopButtonFUN)
-        stopButton.grid(row=100, column=1)
+        stopButton.grid(row=100, column=5)
         startButton = Button(self, text="Start Scan", command=lambda: self.startButtonFUN(True))
         startButton.grid(row=100, column=0)
+
+        self.messageLabel = tkinter.Label(self, text="Test")
+        self.messageLabel.grid(row=101, column=0, columnspan=6)
 
         self.pack()
     
@@ -186,11 +189,6 @@ class Capturing(Frame):
             if infobar.name == IP:
                 return infobar
         
-    def getInfobar(self, IP):
-        """ Gets infobar for IP """
-        for infobar in self.infobars:
-            if infobar.name == IP:
-                return infobar
         
             
 

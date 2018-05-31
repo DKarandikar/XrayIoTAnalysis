@@ -39,7 +39,7 @@ def processPacket(packet, ipDict):
 
     return(ipDict)
 
-def savingPackets(IP, device, action, ipDict):
+def savingPackets(IP, device, action, ipDict, label):
     """
     Saves packets in a .p file for the IP with device and Action Name
     Clears that entry from ipDict and returns it
@@ -54,8 +54,12 @@ def savingPackets(IP, device, action, ipDict):
     # Create a thread to pickle the list because it's a bit slow
     # Use list(ipDict[IP]) to copy the list so that modifying it later isn't a problem
     # str(counter) also serves a similar purpose (unintentionally but happily)
-    t = threading.Thread( target=lambda: pickle.dump(list(ipDict[IP]), open(os.path.join(PACKETS_PATH, device + action + str(counter) + ".p"), "wb") ), name="Saving")
+    t = threading.Thread( target=saveThread, args=(list(ipDict[IP]), device + action + str(counter) + ".p", label) , name="Saving")
     t.start()
 
     ipDict[IP] = []
     return(ipDict)
+
+def saveThread(listToSave, fileName, label):
+    pickle.dump(listToSave, open(os.path.join(PACKETS_PATH, fileName), "wb"))
+    label.config(text="Saved " + fileName)
