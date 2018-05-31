@@ -14,6 +14,8 @@ with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),"config.json")
     
 PACKET_LABEL_TEXT = "Total packets so far: "
 
+print(summaries)
+
 capture = pyshark.LiveCapture(interface=INTERFACE_NAME, only_summaries=summaries)
 
 class Capturing(Frame):

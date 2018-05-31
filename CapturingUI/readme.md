@@ -15,3 +15,8 @@ The latest versions of pyshark don't work well on windows (they won't capture pa
 To fix this run `pip install pyshark==0.3.6.2`
 
 A further issue is with pickling, that issue and the solution to it if the `save` button isn't working can be found here: https://github.com/KimiNewt/pyshark/issues/63
+
+## Processing Captures
+
+Use `procGetAllIPs.py` to output a json file containing all the IPs that are source or destination for each capture
+Use `procPacketBurstification.py` to output pickled packet files where all packets are within 1 sec of the most recent one
