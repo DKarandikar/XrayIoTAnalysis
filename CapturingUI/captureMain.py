@@ -35,10 +35,7 @@ class Capturing(Frame):
         self.IPDict.pop(IP, None)
         infobar = self.getInfobar(IP)
         infobar.updatePacketCount(0)
-<<<<<<< HEAD
-=======
         
->>>>>>> AllGrid
         self.saving = False
     
     def startButtonFUN(self, click):
