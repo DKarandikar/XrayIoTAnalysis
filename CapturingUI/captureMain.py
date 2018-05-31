@@ -74,6 +74,7 @@ class Capturing(Frame):
         self.packetCountStringVar = tkinter.StringVar()
         self.packetCountStringVar.set(PACKET_LABEL_TEXT)
         self.packetCount = 0
+        self.currentRow=3
 
         # Do this last
         self.initUI()
@@ -83,6 +84,12 @@ class Capturing(Frame):
         Sets up the initial UI componenents
         These are the ones that won't change during use
         """
+
+        for y in range(30):
+            tkinter.Grid.grid_columnconfigure(self, y, weight=1)
+
+        for y in range(30):
+            tkinter.Grid.grid_rowconfigure(self, y, weight=1)
         
         self.master.title("Packet Capture")
         self.style = Style()
@@ -93,16 +100,17 @@ class Capturing(Frame):
         separator = Frame(self, height=2, relief=tkinter.SUNKEN)
         separator.grid(row=1, column=0, columnspan=2)  
 
-        self.infoBarFrame = tkinter.Frame(self)
-        self.infoBarFrame.grid(row=2, column=0, columnspan=2, padx=5, pady=20)
-
-        headings = inforBarHeadings.InfoBarHeadings(self.infoBarFrame)
-        headings.pack(side="top", fill=tkinter.BOTH, expand=False)
+        headings = inforBarHeadings.InfoBarHeadings(self)
+        headings.label.grid(column=0, row=2)
+        headings.label2.grid(column=1, row=2)
+        headings.label3.grid(column=2, row=2)
+        headings.label4.grid(column=3, columnspan=2, row=2)
+        headings.label5.grid(column=5, row=2)
  
         stopButton = Button(self, text="Stop Scan", command=self.stopButtonFUN)
-        stopButton.grid(row=3, column=1)
+        stopButton.grid(row=100, column=1)
         startButton = Button(self, text="Start Scan", command=lambda: self.startButtonFUN(True))
-        startButton.grid(row=3, column=0)
+        startButton.grid(row=100, column=0)
 
         self.pack()
     
@@ -125,9 +133,17 @@ class Capturing(Frame):
 
             # If we don't, make a new one and add it
             if not ignore:
-                infobar = infoBar.InfoBar(self.infoBarFrame, self, key, relief=tkinter.RAISED, borderwidth=1)
+                infobar = infoBar.InfoBar(self, self, key, relief=tkinter.RAISED, borderwidth=1)
                 self.infobars.append(infobar)
-                infobar.pack(side="top", fill=tkinter.BOTH, expand=False)
+
+                infobar.label.grid(column=0, row=self.currentRow)
+                infobar.text1.grid(column=1, row=self.currentRow)
+                infobar.text2.grid(column=2, row=self.currentRow)
+                infobar.button1.grid(column=3, row=self.currentRow)
+                infobar.button2.grid(column=4, row=self.currentRow)
+                infobar.label2.grid(column=5, row=self.currentRow)
+
+                self.currentRow += 1
       
         
     def packetSniff(self):
