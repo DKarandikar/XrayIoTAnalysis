@@ -182,7 +182,12 @@ class Capturing(Frame):
 
         #print(self.IPDict)
         
-
+    def getInfobar(self, IP):
+        """ Gets infobar for IP """
+        for infobar in self.infobars:
+            if infobar.name == IP:
+                return infobar
+        
             
 
 def main():
