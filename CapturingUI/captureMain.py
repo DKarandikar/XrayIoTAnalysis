@@ -33,11 +33,8 @@ class Capturing(Frame):
         """
         self.saving = True
         self.IPDict.pop(IP, None)
-        for infobar in self.infobars:
-            if infobar.name == IP:
-                self.infobars.remove(infobar)
-                infobar.pack_forget()
-                break
+        infobar = self.getInfobar(IP)
+        infobar.updatePacketCount(0)
         
         self.saving = False
     
