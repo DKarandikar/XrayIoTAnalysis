@@ -8,7 +8,9 @@ To use, run `captureMain.py`
 
 Config is stored in the `config.json` file, this should be customised to the network and interface desired.
 
-Uses Scapy to capture the packets, correct interface name for the config file can be found by running `ifaces` in a python interpreter 
+Uses Scapy to capture the packets, correct interface name for the config file can be found by running `ifaces` in a python interpreter
+
+For linux, may need to use `setcap cap_net_raw=eip /usr/bin/pythonX.X` for your version of python, or else run `captureMain.py` as root
 
 ## Processing Captures
 

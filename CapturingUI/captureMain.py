@@ -26,7 +26,9 @@ class Capturing(Frame):
         and records device name and action from Entry Boxes
         """
         self.saving = True
+        self.ipDictMutex.acquire()
         self.IPDict = packetProcessing.savingPackets(IP, device, action, self.IPDict, self.messageLabel)
+        self.ipDictMutex.release()
         self.saving = False
 
     def resetButtonFUN(self, IP, device, action):
@@ -34,7 +36,9 @@ class Capturing(Frame):
         Clears the IP packets for that row
         """
         self.saving = True
+        self.ipDictMutex.acquire()
         self.IPDict.pop(IP, None)
+        self.ipDictMutex.release()
         infobar = self.getInfobar(IP)
         infobar.updatePacketCount(0)
         
