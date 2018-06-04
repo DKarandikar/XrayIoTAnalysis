@@ -1,0 +1,14 @@
+Number of epochs: 500
+For class Time, F1 is: 0.95
+For class Weather, F1 is: 0.94
+For class Joke, F1 is: 0.97
+For class Song Author, F1 is: 0
+For class Conversion, F1 is: 0.71
+For class Day of week, F1 is: 0.53
+For class Timer, F1 is: 0.31
+For class Shopping, F1 is: 0.15
+
+Number of epochs: 500
+For class Shopping, F1 is: 0.15
+
+Number of epochs: 2000

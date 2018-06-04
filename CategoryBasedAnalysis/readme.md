@@ -16,3 +16,22 @@ Category Numbers are:
 6. Day Of Week
 7. Timer
 8. Shopping 
+
+## Other scripts
+
+`allClassF1Scores.py` takes the `normalised.csv` file and runs each class against all the others as a binary classification problem and then calculates the F1-score and saves that to a file (and prints to console) 
+
+`testPcap.py` can be used to run a trained model against a new Pcap file to see how it performs
+
+`randomiseClasses.py` produces a data csv with all class values randomized
+
+`getOnlyAlexaData.oy` produces a data csv with only incoming traffic from `normalised.csv`
+
+`countClasses.py` counts the number of each data flow in the normalized and non-normalized data files 
+
+`saveMinMax.py` saves the min and max of each column in `FlowFeatures.csv` for use with the live evaluation script in xray (i.e. the one that runs the trained model live against a running Echo device)
+
+`loadNNTest.py` loads a trained model and displays the confusion matrix and accuracy and also pickles the values of the weights, to be used live via `numpy.matmul` so that it is far quicker than Tensorflow  
+
+`separateClasses.py` can be used to extract only certain classes from `normalised.csv` to train on a subset of that data
+

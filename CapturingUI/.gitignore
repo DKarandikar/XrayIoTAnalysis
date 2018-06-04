@@ -2,3 +2,4 @@ pickledPackets*
 __pycache__
 ips.json
 bursts/
+*.json
