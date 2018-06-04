@@ -167,7 +167,7 @@ class Capturing(Frame):
         self.packetCountStringVar.set(PACKET_LABEL_TEXT + str(self.packetCount))
 
         if not self.wantToSniff:
-            ("I'd really like to stop now")
+            print("I'd really like to stop now")
 
     def tick(self):
         """

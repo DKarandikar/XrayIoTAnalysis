@@ -42,7 +42,7 @@ def savingPackets(IP, device, action, ipDict, label):
     """
     counter = 0
     while True:
-        if os.path.isfile(os.path.join(PACKETS_PATH, device + action + str(counter) + ".p")):
+        if os.path.isfile(os.path.join(PACKETS_PATH, device + action + str(counter) + ".pcap")):
             counter += 1
         else:
             break
@@ -57,5 +57,8 @@ def savingPackets(IP, device, action, ipDict, label):
     return(ipDict)
 
 def saveThread(listToSave, fileName, label):
-    wrpcap(os.path.join(PACKETS_PATH, fileName), listToSave)
-    label.config(text="Saved " + fileName)
+    if len(listToSave) > 0:
+        wrpcap(os.path.join(PACKETS_PATH, fileName), listToSave)
+        label.config(text="Saved " + fileName)
+    else:
+        label.config(test="Nothing to save")

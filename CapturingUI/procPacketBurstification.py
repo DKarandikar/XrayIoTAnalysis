@@ -1,4 +1,5 @@
-import os, pyshark, pickle, inspect, json
+import os,  inspect, json
+from scapy.all import rdpcap, wrpcap, IP
 
 def get_immediate_subdirectories(a_dir):
     return [name for name in os.listdir(a_dir)
@@ -13,11 +14,11 @@ if not os.path.exists(BURSTS_PATH):
 # Get all directories that have valid pickle files
 
 directories = get_immediate_subdirectories(os.path.dirname(os.path.abspath(__file__)))
-packetDirs = [x for x in directories if "pickledPackets" in x]
+packetDirs = [x for x in directories if "savedPackets" in x]
 
 result = {}
 
-print(packetDirs)
+#print(packetDirs)
 
 for directory in packetDirs:
     
@@ -27,51 +28,26 @@ for directory in packetDirs:
         f.extend(filenames)
         break
 
-    for pickledFile in f:
-        print(pickledFile)
-        packets = pickle.load(open( os.path.join(os.path.dirname(os.path.abspath(__file__)),  directory, pickledFile), "rb"))
+    for fileName in f:
+        print("Processing: " + fileName)
+        a = rdpcap(os.path.join(os.path.dirname(os.path.abspath(__file__)),  directory, fileName))
 
-        is_summary = False
-        try:
-            # This only works when it isn't a summary
-            temp = packets[0].ip.src
-        except AttributeError:
-            # Hence if it doesn't work, it's a summary
-            is_summary = True
+        nextPcap = []
+        times = []
 
-        # Now we can just extract bursts
-        if is_summary:
-            currentTime = float(packets[0].time)
-        else:
-            currentTime = float(packets[0].sniff_timestamp)
+        burstNumber = 1
 
-        nextBurst = []
-        burstNumber = 0
+        currentTime = a[0].time
 
-        # Iterate through packets and seperate a burst when one is more than TIME_INTERVAL later than the previous
-        for pkt in packets:
-            if is_summary:
-                packetTime = float(pkt.time)
+        for pkt in a:
+            if (pkt.time - currentTime) < TIME_INTERVAL:
+                nextPcap.append(pkt)
+                currentTime = pkt.time
             else:
-                packetTime = float(pkt.sniff_timestamp)
-
-            if (packetTime - currentTime) < TIME_INTERVAL:
-                nextBurst.append(pkt)
-                if is_summary:
-                    currentTime = float(pkt.time)
-                else:
-                    currentTime = float(pkt.sniff_timestamp)
-            else:
-                filename = directory.split("Packets")[1] + "--" + pickledFile.split(".")[0] + "burst" + str(burstNumber) + ".p"
-                pickle.dump(nextBurst, open(os.path.join(BURSTS_PATH, filename), "wb"))
-                
+                wrpcap(os.path.join(BURSTS_PATH, fileName.split(".")[0] + "burst" + str(burstNumber) + ".pcap"), nextPcap)
                 burstNumber += 1
-                if is_summary:
-                    currentTime = float(pkt.time)
-                else:
-                    currentTime = float(pkt.sniff_timestamp)
+                currentTime = pkt.time
                 nextPcap = [pkt]
 
-        filename = directory.split("Packets")[1] + "--" + pickledFile.split(".")[0] + "burst" + str(burstNumber) + ".p"
-        pickle.dump(nextBurst, open(os.path.join(BURSTS_PATH, filename), "wb"))
+        wrpcap(os.path.join(BURSTS_PATH, fileName.split(".")[0] + "burst" + str(burstNumber) + ".pcap"), nextPcap)
 
