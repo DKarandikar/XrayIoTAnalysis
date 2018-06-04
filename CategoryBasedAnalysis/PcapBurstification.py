@@ -16,14 +16,19 @@ burstNumber = 1
 
 currentTime = a[0].time
 
+name = sys.argv[1]
+
+if "." in name:
+        name = name.split(".")[0]
+
 for pkt in a:
         if (pkt.time - currentTime) < timeInterval:
                 nextPcap.append(pkt)
                 currentTime = pkt.time
         else:
-                wrpcap(os.path.join(BURSTS_PATH, sys.argv[1] + "burst" + str(burstNumber) + ".pcap"), nextPcap)
+                wrpcap(os.path.join(BURSTS_PATH, name + "burst" + str(burstNumber) + ".pcap"), nextPcap)
                 burstNumber += 1
                 currentTime = pkt.time
                 nextPcap = [pkt]
 
-wrpcap(os.path.join(BURSTS_PATH, sys.argv[1] + "burst" + str(burstNumber) + ".pcap"), nextPcap)
+wrpcap(os.path.join(BURSTS_PATH, name + "burst" + str(burstNumber) + ".pcap"), nextPcap)

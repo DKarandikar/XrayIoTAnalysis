@@ -5,7 +5,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 NUMBER_COLUMNS = 56
-DATA_FILENAME = "normalized.csv"
+DATA_FILENAME = "normalizedTen.csv"
 SAVE = True
 PICKLE_ACCURACIES = True
 

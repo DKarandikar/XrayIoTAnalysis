@@ -1,3 +1,7 @@
+"""
+Important Note: This is specialised to Amazon Echo (Alexa) right now
+"""
+
 import os, sys
 from scapy.all import *
 import statistics, csv, pyshark
@@ -91,6 +95,10 @@ for file in f:
         flowClass = "6"
     elif "Shopping" in file and os.path.getsize(os.path.join(os.path.dirname(os.path.abspath(__file__)), "bursts", file)) > 30000:
         flowClass = "8"
+    elif "LightsOnOff" in file and os.path.getsize(os.path.join(os.path.dirname(os.path.abspath(__file__)), "bursts", file)) > 30000:
+        flowClass = "9"
+    elif "LightsBrightDim" in file and os.path.getsize(os.path.join(os.path.dirname(os.path.abspath(__file__)), "bursts", file)) > 30000:
+        flowClass = "10"
     else:
         print("Noise")
         continue
