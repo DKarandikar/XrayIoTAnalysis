@@ -1,5 +1,5 @@
 {
-    "home_ip": "192.168.1",
-    "interface_name": "Realtek PCIe GBE Family Controller",
+    "home_ip": "192.168.4",
+    "interface_name": "wlan0",
     "only_summaries": "True" 
 }

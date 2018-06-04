@@ -75,6 +75,8 @@ class Capturing(Frame):
         self.packetCount = 0
         self.currentRow=3
 
+        self.ipDictMutex = threading.Lock()
+
         # Do this last
         self.initUI()
 
@@ -122,7 +124,7 @@ class Capturing(Frame):
         """
         Updates the UI components that change as it goes along
         """
-        
+        self.ipDictMutex.acquire()
         # Loop through all IP addresses
         for key in self.IPDict.keys():
             ignore = False
@@ -146,7 +148,7 @@ class Capturing(Frame):
                 infobar.label2.grid(column=5, row=self.currentRow)
 
                 self.currentRow += 1
-      
+        self.ipDictMutex.release()
         
     def packetSniff(self):
         """
@@ -161,8 +163,9 @@ class Capturing(Frame):
         # Don't want to mess when saving to avoid race conditions
         while self.saving:
             time.sleep(1)
-
+        self.ipDictMutex.acquire()
         self.IPDict = packetProcessing.processPacket(packet, self.IPDict)
+        self.ipDictMutex.release()
         self.packetCount += 1
         self.packetCountStringVar.set(PACKET_LABEL_TEXT + str(self.packetCount))
 
