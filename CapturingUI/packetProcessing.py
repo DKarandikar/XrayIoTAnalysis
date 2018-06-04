@@ -1,6 +1,8 @@
 import pyshark, pickle, os, json, threading
 import datetime
 
+from scapy.all import IP, wrpcap
+
 now = datetime.datetime.now()
 
 date = "%d-%d-%d" % (now.day, now.month, now.year)
@@ -10,7 +12,7 @@ with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),"config.json")
     HOME_NET_PREFIX = data["home_ip"]
     summaries = data["only_summaries"] == "True"
 
-PACKETS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pickledPackets" + date)
+PACKETS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "savedPackets" + date)
 
 if not os.path.exists(PACKETS_PATH):
     os.makedirs(PACKETS_PATH)
@@ -21,18 +23,12 @@ def processPacket(packet, ipDict):
     Returns the modified dictionary
     """
     try:
-        if not summaries:
-            if HOME_NET_PREFIX in packet.ip.src:
-                ipDict[packet.ip.src].append(packet)
-            if HOME_NET_PREFIX in packet.ip.dst:
-                ipDict[packet.ip.dst].append(packet)
-        else:
-            if HOME_NET_PREFIX in packet.source:
-                ipDict[packet.source].append(packet)
-            if HOME_NET_PREFIX in packet.destination:
-                ipDict[packet.destination].append(packet)
+        if HOME_NET_PREFIX in packet[IP].src:
+            ipDict[packet[IP].src].append(packet)
+        if HOME_NET_PREFIX in packet[IP].dst:
+            ipDict[packet[IP].dst].append(packet)
 
-    except AttributeError:
+    except IndexError:
         # This can happen if a packet has no IP layer
         # We will just ignore packets like this
         print("Attribute Error")
@@ -52,14 +48,14 @@ def savingPackets(IP, device, action, ipDict, label):
             break
 
     # Create a thread to pickle the list because it's a bit slow
-    # Use list(ipDict[IP]) to copy the list so that modifying it later isn't a problem
+    # Use list(ipDict[IP].) to copy the list so that modifying it later isn't a problem
     # str(counter) also serves a similar purpose (unintentionally but happily)
-    t = threading.Thread( target=saveThread, args=(list(ipDict[IP]), device + action + str(counter) + ".p", label) , name="Saving")
+    t = threading.Thread( target=saveThread, args=(list(ipDict[IP]), device + action + str(counter) + ".pcap", label) , name="Saving")
     t.start()
 
     ipDict[IP] = []
     return(ipDict)
 
 def saveThread(listToSave, fileName, label):
-    pickle.dump(listToSave, open(os.path.join(PACKETS_PATH, fileName), "wb"))
+    wrpcap(os.path.join(PACKETS_PATH, fileName), listToSave)
     label.config(text="Saved " + fileName)

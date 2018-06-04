@@ -3,6 +3,8 @@ import pyshark
 from tkinter.ttk import Frame, Button, Style, Scrollbar
 from collections import defaultdict
 
+from scapy.all import sniff
+
 import infoBar, packetProcessing, inforBarHeadings
 
 with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),"config.json")) as f:
@@ -14,9 +16,7 @@ with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),"config.json")
     
 PACKET_LABEL_TEXT = "Total packets so far: "
 
-print(summaries)
 
-capture = pyshark.LiveCapture(interface=INTERFACE_NAME, only_summaries=summaries)
 
 class Capturing(Frame):
     
@@ -153,24 +153,21 @@ class Capturing(Frame):
         Sniffing method that runs on another thread
         Runs forever until the stop button is pressed
         """
-
-        # Have to do this to keep pyshark happy
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        capture.setup_eventloop()
-
-        for packet in capture.sniff_continuously():
-            # Don't want to mess when saving to avoid race conditions
-            while self.saving:
-                time.sleep(1)
-            self.IPDict = packetProcessing.processPacket(packet, self.IPDict)
-            self.packetCount += 1
-            self.packetCountStringVar.set(PACKET_LABEL_TEXT + str(self.packetCount))
-
-            if not self.wantToSniff:
-                break
-        
+        sniff(iface=INTERFACE_NAME, prn=lambda x: self.process(x))
         self.Sniffing = False
+    
+    def process(self, packet):
+        
+        # Don't want to mess when saving to avoid race conditions
+        while self.saving:
+            time.sleep(1)
+
+        self.IPDict = packetProcessing.processPacket(packet, self.IPDict)
+        self.packetCount += 1
+        self.packetCountStringVar.set(PACKET_LABEL_TEXT + str(self.packetCount))
+
+        if not self.wantToSniff:
+            ("I'd really like to stop now")
 
     def tick(self):
         """
