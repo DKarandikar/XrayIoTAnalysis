@@ -4,3 +4,4 @@ __pycache__
 ips.json
 bursts/
 *.json
+config.json

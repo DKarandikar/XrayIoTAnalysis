@@ -1,13 +1,23 @@
 import tensorflow as tf
-import random, os, pickle, sys
+import random, os, pickle, sys, time
 import numpy as np
 import pandas as pd 
 from sklearn.model_selection import train_test_split
 
 NUMBER_COLUMNS = 56
-DATA_FILENAME = "normalizedTen.csv"
+DATA_FILENAME = "normalizedEleven.csv"
 SAVE = True
 PICKLE_ACCURACIES = True
+
+COMBINE_LIGHTS = True
+
+HIDDEN_NODES = 20
+SAVE_INTERVAL = 1000
+TOTAL_EPOCHS = 10000
+
+RANDOM_SEED = 83
+
+
 
 try:
     if sys.argv[1] == "incOnly":
@@ -23,11 +33,7 @@ except:
 DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", DATA_FILENAME )
 
 MODEL_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models",  "model_" + DATA_FILENAME.split(".")[0])
-HIDDEN_NODES = 20
-SAVE_INTERVAL = 1000
-TOTAL_EPOCHS = 100000
 
-RANDOM_SEED = 83
 
 
 
@@ -74,6 +80,14 @@ def get_data():
 
     data = np.float32(d)
     target = labels.flatten()
+    
+    if COMBINE_LIGHTS:
+        for index, value in enumerate(target):
+            if value == 10:
+                target[index] = 9    
+            if value > 10:
+                target[index] = value - 1
+    
 
     #print(data.shape)
     
@@ -129,6 +143,8 @@ def main():
         init = tf.global_variables_initializer()
         sess.run(init)
 
+        startTime = time.time()
+
         for epoch in range(TOTAL_EPOCHS):
             # Train with each example
             for i in range(len(train_X)):
@@ -141,6 +157,8 @@ def main():
 
             print("Epoch = %d, train accuracy = %.2f%%, test accuracy = %.2f%%"
                 % (epoch + 1, 100. * train_accuracy, 100. * test_accuracy))
+            timeLeft = ((time.time()-startTime) * (TOTAL_EPOCHS-epoch) * 1.0/(epoch+1) *1.0)
+            print("Estimated time left is %.2f seconds" % timeLeft )
 
             testAccuracy.append(100. * train_accuracy)
             trainAccuracy.append(100. * test_accuracy)

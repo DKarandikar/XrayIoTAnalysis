@@ -99,6 +99,8 @@ for file in f:
         flowClass = "9"
     elif "LightsBrightDim" in file and os.path.getsize(os.path.join(os.path.dirname(os.path.abspath(__file__)), "bursts", file)) > 30000:
         flowClass = "10"
+    elif "Alarms" in file and os.path.getsize(os.path.join(os.path.dirname(os.path.abspath(__file__)), "bursts", file)) > 30000:
+        flowClass = "11"
     else:
         print("Noise")
         continue

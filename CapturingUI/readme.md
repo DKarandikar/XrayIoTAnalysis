@@ -6,7 +6,7 @@ Designed for python 3
 
 To use, run `captureMain.py`
 
-Config is stored in the `config.json` file, this should be customised to the network and interface desired.
+Config is stored in the `config.json` file, this should be  copied from sample and customised to the network and interface desired.
 
 Uses Scapy to capture the packets, correct interface name for the config file can be found by running `ifaces` in a python interpreter
 

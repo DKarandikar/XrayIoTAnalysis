@@ -5,7 +5,7 @@ NUMBER_COLUMNS = 56
 NUMBER_FEATURES = 54
 
 ORIGINAL_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "FlowFeatures.csv")
-OUTPUT_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalizedTen.csv")
+OUTPUT_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalizedEleven.csv")
 
 df = pd.read_csv( ORIGINAL_DATA, usecols = [x for x in range(NUMBER_COLUMNS-NUMBER_FEATURES,NUMBER_COLUMNS)], header=None)
 df2 = pd.read_csv( ORIGINAL_DATA, usecols = [x for x in range(0,NUMBER_COLUMNS-NUMBER_FEATURES)], header=None)
