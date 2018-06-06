@@ -12,13 +12,13 @@ BURST_TIME_INTERVAL = 1.0
 FLOW_SIZE_CUTOFF = 10   # Minimum number of packets to be counted as a valid flow
 
 MODELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
-MAIN_MODEL_META = os.path.join(MODELS_PATH, "iter_model-7800.meta")
-MAIN_MODEL_NAME = "iter_model-7800"
-NUMBER_HIDDEN_NODES_USED = 15
-NUMBER_CLASSES_USED = 8
+MAIN_MODEL_META = os.path.join(MODELS_PATH, "model_incOnly-2000.meta")
+MAIN_MODEL_NAME = "model_incOnly-2000"
+NUMBER_HIDDEN_NODES_USED = 10
+NUMBER_CLASSES_USED = 10
 
 GETINPUT = False
-TEST_FILENAME = "AlexaTest4"
+TEST_FILENAME = "AlexaTest1"
 
 DEVICE_IP = "192.168.4.2"
 
@@ -26,22 +26,18 @@ NUMBER_COLUMNS = 56
 FEATURES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "FlowFeatures.csv")
 DF = pd.read_csv(FEATURES_FILE, usecols = [x for x in range(2,NUMBER_COLUMNS)], header=None)
 
+INC_ONLY = True
+
 
 def normaliseColumn(array, colNo):
     """
     Min-max normalise data in array (a N * 54 shape) w.r.t. max/min in FEATURES_FILE
     """
     values = array[:, colNo]
-    
     normalized = (values - DF.iloc[:,colNo].min()) / (DF.iloc[:,colNo].max() - DF.iloc[:,colNo].min() + 0.000000000000000001)
-    
-    # if colNo == 2:
-    #     print(DF.iloc[:,colNo-2])
-    #     print(values)
-    #     print(DF.iloc[:,colNo-2].min())
-    #     print(DF.iloc[:,colNo-2].max())
 
     array[:, colNo] = normalized
+    #print(array)
     return array
 
 def forwardprop(X, w_1, w_2):
@@ -213,8 +209,8 @@ def modelPrediction(data, model_name, models_path, classes):
             imported_meta.restore(sess, os.path.join(models_path, model_name))
             graph = tf.get_default_graph()
 
-            w1 = graph.get_tensor_by_name("Variable:0")
-            w2 = graph.get_tensor_by_name("Variable_1:0")
+            w1 = graph.get_tensor_by_name("weights1:0")
+            w2 = graph.get_tensor_by_name("weights2:0")
 
             # Layer's sizes
             x_size = data.shape[1]                            # Number of input nodes 
@@ -238,7 +234,7 @@ def printPrediction(data, predictions, values):
     Prints a list of int predictions using Alexa category names 
     Also prints other possible close categories
     """
-    categoryNames = {1: "Time", 2: "Weather", 3: "Joke", 4: "Song Author", 5: "Conversion", 6: "Day of week", 7: "Timer", 8: "Shopping"}
+    categoryNames = {1: "Time", 2: "Weather", 3: "Joke", 4: "Song Author", 5: "Conversion", 6: "Day of week", 7: "Timer", 8: "Shopping", 9: "Lights", 10: "Alarms"}
 
     for counter, prediction in np.ndenumerate(predictions):
         
@@ -312,10 +308,15 @@ def main(fileName):
 
     data = np.array(validFlows, dtype='float32')
 
+
     for x in range(NUMBER_COLUMNS-2):
         data = normaliseColumn(data, x)
 
+
     # Setup the model
+
+    if INC_ONLY:
+        data = data[:, 20:38]
 
     all_X = addBiases(data)
 

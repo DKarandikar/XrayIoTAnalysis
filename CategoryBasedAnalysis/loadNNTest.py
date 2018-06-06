@@ -10,16 +10,21 @@ MODELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
 MODEL_META_FILENAME = "model_normalizedTen-10000.meta"
 NUMBER_HIDDEN_NODES = 20
 
-DATA_FILENAME = "normalizedTen.csv"
+DATA_FILENAME = "normalizedEleven.csv"
 NUMBER_COLUMNS = 56
 NP_SAVE = False
 
+COMBINE_LIGHTS = True
+
+onlyIncoming = False
+DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", DATA_FILENAME )
+
 try:
     if sys.argv[1] == "incOnly":
-        NUMBER_COLUMNS = 20
-        DATA_FILENAME = "onlyIncoming.csv"
+        onlyIncoming = True
+        NUMBER_HIDDEN_NODES = 10
         NP_SAVE = False
-        MODEL_META_FILENAME = "model_onlyIncoming-400.meta"
+        MODEL_META_FILENAME = "model_incOnly-2000.meta"
         print("Incoming Packets Model")
 except:
     print("Except")
@@ -59,18 +64,29 @@ def confusionMatrix(real, pred):
 def get_data():
     """ Read the csv data set and split them into training and test sets """
     
-    df = pd.read_csv(FILE_PATH,
-            usecols = [x for x in range(2,NUMBER_COLUMNS)],
-            header=None)
-    d = df.values
+    if not onlyIncoming:
+        df = pd.read_csv(DATA_FILE_PATH, usecols = [x for x in range(2,NUMBER_COLUMNS)], header=None)
+    else:
+        # Data is added in the following order: OUT / IN / BOTH
+        df = pd.read_csv(DATA_FILE_PATH, usecols = [x for x in range(20,NUMBER_COLUMNS-18)], header=None)
+        print(df)
+        print(DATA_FILE_PATH)
+    
 
-    l = pd.read_csv(FILE_PATH,
-            usecols = [1], 
-            header = None)
+    d = df.values
+    #print(df)
+    l = pd.read_csv(DATA_FILE_PATH, usecols = [1], header = None)
     labels = l.values
 
     data = np.float32(d)
     target = labels.flatten()
+    
+    if COMBINE_LIGHTS:
+        for index, value in enumerate(target):
+            if value == 10:
+                target[index] = 9    
+            if value > 10:
+                target[index] = value - 1
 
     #print(data.shape)
 
@@ -82,6 +98,8 @@ def get_data():
     N, M  = data.shape
     all_X = np.ones((N, M + 1))
     all_X[:, 1:] = data
+
+    #print(all_X)
 
     # Convert into one-hot vectors
     all_Y = np.zeros((target.size, target.max()+1))

@@ -17,22 +17,25 @@ TOTAL_EPOCHS = 10000
 
 RANDOM_SEED = 83
 
+DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", DATA_FILENAME )
 
+MODEL_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models",  "model_" + DATA_FILENAME.split(".")[0])
+
+onlyIncoming = False
 
 try:
     if sys.argv[1] == "incOnly":
-        NUMBER_COLUMNS = 20
-        DATA_FILENAME = "onlyIncoming.csv"
+        onlyIncoming = True
         SAVE=True
+        MODEL_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models",  "model_" + "incOnly")
         PICKLE_ACCURACIES = False
+        HIDDEN_NODES = 10
         print("Incoming Packets Model")
 except:
     pass
 
 
-DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", DATA_FILENAME )
 
-MODEL_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models",  "model_" + DATA_FILENAME.split(".")[0])
 
 
 
@@ -71,8 +74,11 @@ def confusionMatrix(real, pred):
 
 def get_data():
     """ Read the csv data set and split them into training and test sets """
-
-    df = pd.read_csv(DATA_FILE_PATH, usecols = [x for x in range(2,NUMBER_COLUMNS)], header=None)
+    if not onlyIncoming:
+        df = pd.read_csv(DATA_FILE_PATH, usecols = [x for x in range(2,NUMBER_COLUMNS)], header=None)
+    else:
+        # Data is added in the following order: OUT / IN / BOTH
+        df = pd.read_csv(DATA_FILE_PATH, usecols = [x for x in range(20,NUMBER_COLUMNS-18)], header=None)
     d = df.values
 
     l = pd.read_csv(DATA_FILE_PATH, usecols = [1], header = None)
