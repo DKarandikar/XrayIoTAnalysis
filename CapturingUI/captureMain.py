@@ -1,5 +1,4 @@
 import threading, asyncio, tkinter, time, json, os
-import pyshark
 from tkinter.ttk import Frame, Button, Style, Scrollbar
 from collections import defaultdict
 

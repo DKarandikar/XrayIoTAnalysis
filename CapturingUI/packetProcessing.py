@@ -1,4 +1,4 @@
-import pyshark, pickle, os, json, threading
+import pickle, os, json, threading
 import datetime
 
 from scapy.all import IP, wrpcap
