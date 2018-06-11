@@ -16,6 +16,10 @@ Category Numbers are:
 6. Day Of Week
 7. Timer
 8. Shopping 
+9. LightsOnOff
+10. LightsBrightDim
+11. Alarms
+
 
 ## Other scripts
 
@@ -35,3 +39,4 @@ Category Numbers are:
 
 `separateClasses.py` can be used to extract only certain classes from `normalised.csv` to train on a subset of that data
 
+`pcaDataExtraction.py` extracts from FlowFeatures the 12 most significant principal components and constructs a new csv with data from those

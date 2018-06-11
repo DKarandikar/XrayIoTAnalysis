@@ -1,5 +1,6 @@
 pickledPackets*
 savedPackets*
+node_modules/
 __pycache__
 ips.json
 bursts/
