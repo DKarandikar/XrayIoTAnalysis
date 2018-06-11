@@ -7,14 +7,15 @@ from tensorflow.python.tools.inspect_checkpoint import print_tensors_in_checkpoi
 
 RANDOM_SEED = 83
 MODELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
-MODEL_META_FILENAME = "model_normalizedTen-10000.meta"
+MODEL_META_FILENAME = "model_normalizedPCA-2000.meta"
 NUMBER_HIDDEN_NODES = 20
 
-DATA_FILENAME = "normalizedEleven.csv"
-NUMBER_COLUMNS = 56
+DATA_FILENAME = "normalizedPCA.csv"
+NUMBER_COLUMNS = 14
 NP_SAVE = False
 
 COMBINE_LIGHTS = True
+ONLY_KEY_CATEGORIES = True # Only Time, Shopping, Joke, LightsCombined and Alarms
 
 onlyIncoming = False
 DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", DATA_FILENAME )
@@ -87,6 +88,28 @@ def get_data():
                 target[index] = 9    
             if value > 10:
                 target[index] = value - 1
+
+    if ONLY_KEY_CATEGORIES:
+    
+        totalKeyCategories = 0
+
+        for x in target:
+            if x in [9, 1, 10, 8, 3]:
+                totalKeyCategories += 1
+
+        newData = np.zeros(shape=(totalKeyCategories, NUMBER_COLUMNS-2), dtype=float)
+        newTarget = np.zeros(shape = (totalKeyCategories), dtype=int)
+
+        tick = 0
+
+        for index, value in enumerate(target):
+            if value in [9, 1, 10, 8, 3]:
+                newTarget[tick] = value
+                newData[tick, :] = data[index, :]
+                tick += 1
+
+        data = newData
+        target = newTarget
 
     #print(data.shape)
 

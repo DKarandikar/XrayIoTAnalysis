@@ -10,7 +10,7 @@ SAVE = True
 PICKLE_ACCURACIES = True
 
 COMBINE_LIGHTS = True
-ONLY_KEY_CATEGORIES = True
+ONLY_KEY_CATEGORIES = True # Only Time, Shopping, Joke, LightsCombined and Alarms
 
 HIDDEN_NODES = 20
 SAVE_INTERVAL = 1000

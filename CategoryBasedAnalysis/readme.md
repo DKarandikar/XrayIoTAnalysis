@@ -40,3 +40,5 @@ Category Numbers are:
 `separateClasses.py` can be used to extract only certain classes from `normalised.csv` to train on a subset of that data
 
 `pcaDataExtraction.py` extracts from FlowFeatures the 12 most significant principal components and constructs a new csv with data from those
+
+`graphAccuracies.py` is a quick script to graph test and train accuracies on the same axis
