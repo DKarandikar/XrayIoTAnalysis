@@ -14,7 +14,7 @@ ONLY_KEY_CATEGORIES = True # Only Time, Shopping, Joke, LightsCombined and Alarm
 
 HIDDEN_NODES = 20
 SAVE_INTERVAL = 1000
-TOTAL_EPOCHS = 10000
+TOTAL_EPOCHS = 20000
 
 RANDOM_SEED = 83
 

@@ -1,3 +1,6 @@
+"""
+A basic NN which can be adapted to fit other scenarios, or run on its own
+"""
 import tensorflow as tf
 import random, os, pickle, sys, time
 import numpy as np
@@ -17,7 +20,7 @@ TOTAL_EPOCHS = 10000
 
 RANDOM_SEED = 83
 
-DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", DATA_FILENAME )
+DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataProc", "data", DATA_FILENAME )
 
 MODEL_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models",  "model_" + DATA_FILENAME.split(".")[0])
 
@@ -33,11 +36,6 @@ try:
         print("Incoming Packets Model")
 except:
     pass
-
-
-
-
-
 
 
 tf.set_random_seed(RANDOM_SEED)

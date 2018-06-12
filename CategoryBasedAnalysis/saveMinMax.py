@@ -4,7 +4,7 @@ if os.path.isfile(os.path.join(os.path.dirname(os.path.abspath(__file__)), "live
     os.remove(os.path.join(os.path.dirname(os.path.abspath(__file__)), "liveCapFiles",  "minMax.csv"))
 
 with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "liveCapFiles",  "minMax.csv"),'a', newline='') as cleanFile:
-    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "FlowFeatures.csv"),"r") as feat:
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataProc", data",  "FlowFeatures.csv"),"r") as feat:
         features = csv.reader(feat)
         minMax = csv.writer(cleanFile)
 

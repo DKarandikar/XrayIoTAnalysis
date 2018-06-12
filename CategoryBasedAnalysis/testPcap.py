@@ -23,7 +23,7 @@ TEST_FILENAME = "AlexaTest1"
 DEVICE_IP = "192.168.4.2"
 
 NUMBER_COLUMNS = 56
-FEATURES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "FlowFeatures.csv")
+FEATURES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataProc", data",  "FlowFeatures.csv")
 DF = pd.read_csv(FEATURES_FILE, usecols = [x for x in range(2,NUMBER_COLUMNS)], header=None)
 
 INC_ONLY = True

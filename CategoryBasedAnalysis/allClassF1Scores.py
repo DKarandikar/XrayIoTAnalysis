@@ -14,7 +14,7 @@ SAVE = False
 PICKLE_ACCURACIES = False
 
 
-DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", DATA_FILENAME )
+DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataProc", "data", DATA_FILENAME )
 
 MODEL_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models",  "model_" + DATA_FILENAME.split(".")[0])
 HIDDEN_NODES = 20

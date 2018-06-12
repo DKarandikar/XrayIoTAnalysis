@@ -1,3 +1,8 @@
+"""
+Loads and tests a particular model of the NN 
+In general constants to change are:
+    MODEL_META_FILENAME, NUMBER_COLUMNS, COMBINE_LIGHTS and ONLY_KEY_CATEGORIES
+"""
 import tensorflow as tf
 import random, os, pickle, sys
 import numpy as np
@@ -18,7 +23,7 @@ COMBINE_LIGHTS = True
 ONLY_KEY_CATEGORIES = True # Only Time, Shopping, Joke, LightsCombined and Alarms
 
 onlyIncoming = False
-DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", DATA_FILENAME )
+DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataProc", "data", DATA_FILENAME )
 
 try:
     if sys.argv[1] == "incOnly":
@@ -32,7 +37,7 @@ except:
     pass
 
 
-FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  DATA_FILENAME)
+FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataProc", "data",  DATA_FILENAME)
 
 PICKLE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "liveCapFiles")
 
