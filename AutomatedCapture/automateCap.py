@@ -80,7 +80,7 @@ def main():
 
                 print("Capturing for " + str(time + 15) + " seconds")
 
-                packets = sniff(filter="ip " + DEVICE_IP , timeout=time + 15, iface=INTERFACE_NAME, prn=lambda pkt: pkt.summary())
+                packets = sniff(filter="ip " + DEVICE_IP , timeout=time + 15, iface=INTERFACE_NAME)
 
                 savePackets(packets, file.split(".")[0])
 

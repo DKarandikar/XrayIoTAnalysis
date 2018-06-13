@@ -1,5 +1,6 @@
 import os, datetime, csv
 import pandas as pd
+from scapy.all import IP
 
 DEVICE_IP = "192.168.4.2"
 BURST_PACKET_NO_CUTOFF = 60
@@ -35,16 +36,16 @@ def getBursts(packets):
     """
     validBursts = []
     nextPcap = []
-    currentTime = float(packets[0].sniff_timestamp)
+    currentTime = float(packets[0].time)
 
     for p in packets:
-        if (float(p.sniff_timestamp) - currentTime) < BURST_TIME_INTERVAL:
+        if (float(p.time) - currentTime) < BURST_TIME_INTERVAL:
             nextPcap.append(p)
-            currentTime = float(p.sniff_timestamp)
+            currentTime = float(p.time)
         else:
             if len(nextPcap) > BURST_PACKET_NO_CUTOFF:
                 validBursts.append(nextPcap)
-            currentTime = float(p.sniff_timestamp)
+            currentTime = float(p.time)
             nextPcap = [p]
 
     if len(nextPcap) > BURST_PACKET_NO_CUTOFF:
@@ -59,10 +60,10 @@ def getIps(burst):
     for p in burst:
         if 'IP' in p:
             try:
-                source = str(p['ip'].src)
-                destination = str(p['ip'].dst)
+                source = str(p[IP].src)
+                destination = str(p[IP].dst)
                 srcdest.add((source, destination))
-            except AttributeError:
+            except IndexError:
                 print("Attribute error")
         
         
@@ -84,8 +85,8 @@ def getFlowDict(sourcedest, burst):
             for p in burst:
                 if 'IP' in p:
                     try:
-                        if str(p['ip'].src) == source and str(p['ip'].dst) == dest:
-                            flowLens.append(int(p.length))
+                        if str(p[IP].src) == source and str(p[IP].dst) == dest:
+                            flowLens.append(int(p.len))
                     except AttributeError:
                         print("Attribute error")
             
@@ -160,7 +161,7 @@ def getFlowClass(filename):
 def getCSVWriter():
     ### Setup csv file
 
-    csvpath = os.path.join(FILE_PATH, "data")
+    csvPath = os.path.join(FILE_PATH, "data")
     if not os.path.exists(csvPath):
         os.makedirs(csvPath)
 
