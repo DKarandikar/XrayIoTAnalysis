@@ -76,8 +76,6 @@ def main():
                 
                 fullPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "audioFiles", file)
 
-                time = playForLess20Mins(fullPath)
-
                 time = playForLessXMins(fullPath)
 
                 print("Capturing for " + str(time + 15) + " seconds")
