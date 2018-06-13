@@ -25,7 +25,7 @@ def getFiles():
 
 def loopSong(filename, plays):
     for x in range(plays):
-        call(["cvlc", filename])
+        call(["cvlc", "--play-and-exit", filename])
 
 def getFileLength(filename):
     mycmd = getoutput("ffmpeg -i " + filename + " 2>&1 | grep Duration | cut -d ' ' -f 4 | sed s/,// ")
