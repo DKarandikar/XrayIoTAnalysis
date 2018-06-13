@@ -4,7 +4,7 @@ While that occurs, capture traffic, then save as PCAP with name of audio
 """
 import os, threading, math
 from scapy.all import sniff
-from subprocess import call, Popen, PIPE
+from subprocess import call, Popen, PIPE, getoutput
 
 INTERFACE_NAME = "wlan0"
 DEVICE_IP = "192.168.4.2"
@@ -23,18 +23,16 @@ def loopSong(filename, plays):
         call(["cvlc", filename])
 
 def getFileLength(filename):
-    p1 = Popen(["ffmpeg", "-i", filename, "2>&l"], stdout=PIPE)
-    p2 = Popen(["grep", "duration"], stdin=p1.stdout, stdout=PIPE)
-    p3 = Popen(["cut", "-d", r"""' '""", "-f", "4"], stdin=p2.stdout, stdout=PIPE)
-    p4 = Popen(["sed", r"s/,//"], stdin=p3.stdout, stdout=PIPE)
-    return p4.communicate()[0]
+
+    mycmd = getoutput("ffmpeg -i " + filename + " 2>&1 | grep Duration | cut -d ' ' -f 4 | sed s/,// ")
+    return mycmd
 
 def convertFloatLength(string):
     hours = string.split(":")[0]
     minutes = string.split(":")[1]
     seconds = string.split(":")[2].split(".")[0]
 
-    return (3600*hours + 60*minutes + seconds + 1)
+    return (3600*int(hours) + 60*int(minutes) + int(seconds) + 1)
 
 for file in getFiles():
     fullPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "audioFiles", file)
