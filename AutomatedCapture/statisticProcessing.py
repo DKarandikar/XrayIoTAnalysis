@@ -86,7 +86,9 @@ def getFlowDict(sourcedest, burst):
                 if 'IP' in p:
                     try:
                         if str(p[IP].src) == source and str(p[IP].dst) == dest:
-                            flowLens.append(int(p.len))
+                            flowLens.append(int(p.len) + 14)
+                            # This 14 is to fix a mismatch between scapy and pyshark
+                            # The bulk of my data was from pyshark, and that reports as 14B bigger than scapy systematically
                     except AttributeError:
                         print("Attribute error")
             
@@ -209,8 +211,12 @@ def saveStatistics(listListFloats, filename, bNo):
 
         writer.writerow(row)
 
+        fCounter += 1
+
 def processPackets(packets, filename):
     bursts = getBursts(packets)
+
+    print(len(bursts))
 
     # Seprate out all the flows and get stats 
 
