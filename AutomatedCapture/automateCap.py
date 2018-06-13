@@ -6,6 +6,8 @@ import os, threading, math, datetime
 from scapy.all import sniff, wrpcap
 from subprocess import call, Popen, PIPE, getoutput
 
+import statisticProcessing
+
 INTERFACE_NAME = "wlan0"
 DEVICE_IP = "192.168.4.2"
 FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)))
@@ -66,23 +68,25 @@ def savePackets(packets, filename):
         print("Saved file: " + filename + str(counter) + ".pcap")
 
 
-    
-
 def main():
-    while True:
-        for file in getFiles():
-            
-            fullPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "audioFiles", file)
+    try:
+        while True:
+            for file in getFiles():
+                
+                fullPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "audioFiles", file)
 
-            time = playForLess20Mins(fullPath)
+                time = playForLess20Mins(fullPath)
 
-            print("Capturing for " + time + 15 + " seconds")
+                print("Capturing for " + time + 15 + " seconds")
 
-            packets = sniff(filter="ip " + DEVICE_IP , timeout=time + 15, iface=INTERFACE_NAME)
+                packets = sniff(filter="ip " + DEVICE_IP , timeout=time + 15, iface=INTERFACE_NAME)
 
-            savePackets(packets, file.split(".")[0])
+                savePackets(packets, file.split(".")[0])
 
-            #processPackets(packets)
+                statisticProcessing.processPackets(packets, file.split(".")[0])
+
+    except KeyboardInterrupt:
+        print("Interrupted")
 
 
 if __name__ == '__main__':
