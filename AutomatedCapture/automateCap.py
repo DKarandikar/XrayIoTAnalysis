@@ -10,6 +10,7 @@ import statisticProcessing
 
 INTERFACE_NAME = "wlan0"
 DEVICE_IP = "192.168.4.2"
+SESSION_LENGTH = 100 # Max seconds to play
 FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -36,11 +37,11 @@ def convertFloatLength(string):
     seconds = string.split(":")[2].split(".")[0]
     return (3600*int(hours) + 60*int(minutes) + int(seconds) + 1)
 
-def playForLess20Mins(filename):
+def playForLessXMins(filename):
     fileLength = getFileLength(filename)
     lengthFloat = convertFloatLength(fileLength)
-    numberPlays = math.floor(1.0* 1200 / float(lengthFloat))
-    print("File length is " + str(int(lengthFloat)) + " seconds, playing " + numberPlays + " times" )
+    numberPlays = math.floor(1.0* SESSION_LENGTH / float(lengthFloat))
+    print("File length is " + str(int(lengthFloat)) + " seconds, playing " + str(numberPlays) + " times" )
     t = threading.Thread(target=loopSong, args=(filename, numberPlays ) , name="PlayMusic")
     t.start()
 
@@ -77,9 +78,11 @@ def main():
 
                 time = playForLess20Mins(fullPath)
 
-                print("Capturing for " + time + 15 + " seconds")
+                time = playForLessXMins(fullPath)
 
-                packets = sniff(filter="ip " + DEVICE_IP , timeout=time + 15, iface=INTERFACE_NAME)
+                print("Capturing for " + str(time + 15) + " seconds")
+
+                packets = sniff(filter="ip " + DEVICE_IP , timeout=time + 15, iface=INTERFACE_NAME, prn=lambda pkt: pkt.summary())
 
                 savePackets(packets, file.split(".")[0])
 
