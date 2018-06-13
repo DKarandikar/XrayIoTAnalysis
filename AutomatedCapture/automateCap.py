@@ -10,7 +10,7 @@ import statisticProcessing
 
 INTERFACE_NAME = "wlan0"
 DEVICE_IP = "192.168.4.2"
-SESSION_LENGTH = 100 # Max seconds to play
+SESSION_LENGTH = 1200 # Max seconds to play
 FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
 
