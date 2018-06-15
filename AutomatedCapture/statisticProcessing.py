@@ -86,7 +86,7 @@ def getFlowDict(sourcedest, burst):
                 if 'IP' in p:
                     try:
                         if str(p[IP].src) == source and str(p[IP].dst) == dest:
-                            flowLens.append(int(p.len) + 14)
+                            flowLens.append(int(p.len) + 14)    # The +14 is to deal with a scapy/pyshark mismatch
                     except AttributeError:
                         print("Attribute error")
             
