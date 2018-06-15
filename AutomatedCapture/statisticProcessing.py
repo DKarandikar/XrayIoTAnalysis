@@ -86,7 +86,7 @@ def getFlowDict(sourcedest, burst):
                 if 'IP' in p:
                     try:
                         if str(p[IP].src) == source and str(p[IP].dst) == dest:
-                            flowLens.append(int(p.length))
+                            flowLens.append(int(p.len) + 14)
                     except AttributeError:
                         print("Attribute error")
             
@@ -161,7 +161,7 @@ def getFlowClass(filename):
 def getCSVWriter():
     ### Setup csv file
 
-    csvpath = os.path.join(FILE_PATH, "data")
+    csvPath = os.path.join(FILE_PATH, "data")
     if not os.path.exists(csvPath):
         os.makedirs(csvPath)
 
@@ -210,6 +210,8 @@ def saveStatistics(listListFloats, filename, bNo):
         writer = getCSVWriter()
 
         writer.writerow(row)
+
+        fCounter += 1
 
 def processPackets(packets, filename):
     bursts = getBursts(packets)
