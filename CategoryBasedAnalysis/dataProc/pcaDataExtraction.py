@@ -1,4 +1,4 @@
-import os
+import os, pickle
 import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
@@ -28,4 +28,11 @@ df2 = pd.read_csv( ORIGINAL_DATA, usecols = [x for x in range(0,2)], header=None
 big = pd.merge(df2, principalDf, on=df2.index, how='inner')
 del big['key_0']
 print(big)
-big.to_csv( OUTPUT_DATA, index = False, header=None) 
+
+# Do one of the following, or both:
+
+#big.to_csv( OUTPUT_DATA, index = False, header=None) 
+
+#pickle.dump( pca, open( "pca.p", "wb" ) )
+#pickle.dump( scaler, open( "preScaler.p", "wb" ) )
+#pickle.dump( scaler2, open( "postScaler.p", "wb" ) )

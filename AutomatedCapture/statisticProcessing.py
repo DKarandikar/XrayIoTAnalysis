@@ -199,7 +199,7 @@ def saveStatistics(listListFloats, filename, bNo):
     fCounter = 0
     for listFloats in listListFloats:
         row = []
-        row.append(filename + str(counter) + "Burst" + str(bNo) + "Flow" + str(fCounter))
+        row.append(filename + str(counter) + "On" + date + "Burst" + str(bNo) + "Flow" + str(fCounter))
 
         classNumber = getFlowClass(filename)
 
