@@ -5,9 +5,9 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 NUMBER_COLUMNS = 14
-DATA_FILENAME = "normalizedPCA.csv"
-SAVE = True
-PICKLE_ACCURACIES = True
+DATA_FILENAME = "normalizedPCACombined.csv"
+SAVE = False
+PICKLE_ACCURACIES = False
 
 COMBINE_LIGHTS = True
 ONLY_KEY_CATEGORIES = True # Only Time, Shopping, Joke, LightsCombined and Alarms
@@ -18,7 +18,7 @@ TOTAL_EPOCHS = 20000
 
 RANDOM_SEED = 83
 
-DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", DATA_FILENAME )
+DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataProc", "data", DATA_FILENAME )
 MODEL_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models",  "model_" + DATA_FILENAME.split(".")[0])
 
 onlyIncoming = False
