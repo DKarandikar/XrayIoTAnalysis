@@ -2,6 +2,7 @@ import pyaudio, struct, math, datetime, os, threading, time
 import numpy as np
 from scapy.all import sniff, wrpcap
 from subprocess import call, Popen, PIPE, getoutput
+from multiprocessing import Pool
 
 """
 Repeat:
@@ -99,11 +100,15 @@ def getCutoffs(listInts):
     
     return cutoffs
 
-def sniffPackets(time, result):
+def sniffPackets(time):
+
+    print(time + RECORD_SECONDS + 10)
     
     packets = sniff(filter="ip " + DEVICE_IP , timeout=time + RECORD_SECONDS + 10, iface=INTERFACE_NAME)
 
     result = packets
+
+    print(result)
     
 def convertFloatLength(string):
     hours = string.split(":")[0]
@@ -117,11 +122,10 @@ for file in getFiles():
 
     # Sniff here
 
-    result = None
 
     duration = convertFloatLength(getFileLength(os.path.join(FILE_PATH, "audioCutUps",file)))
 
-    t = threading.Thread(target=sniffPackets, args=(duration, result ) , name="SniffTraffic")
+    t = threading.Thread(target=sniffPackets, args=(duration, ) , name="SniffTraffic")
     t.start()
 
     # Play audio
@@ -147,10 +151,13 @@ for file in getFiles():
         data = stream.read(CHUNK, exception_on_overflow=False)
         frames.append(get_rms(data))
 
-    while result == None:
-        time.sleep(0.5)
+    stream.stop_stream()
+    stream.close()
+        
+    # Wait for sniffing to be done
+    t.join()
     
     print(frames)
-    print(result)
+
 
 #print(frames)
