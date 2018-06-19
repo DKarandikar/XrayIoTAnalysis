@@ -1,7 +1,4 @@
-import pyaudio, struct, math, datetime, os, threading
-import matplotlib
-matplotlib.use('GTK3Agg')
-import matplotlib.pyplot as plt
+import pyaudio, struct, math, datetime, os, threading, time
 import numpy as np
 from scapy.all import sniff, wrpcap
 from subprocess import call, Popen, PIPE, getoutput
@@ -19,6 +16,9 @@ End sniff, process
 
 """
 
+INTERFACE_NAME = "wlan0"
+DEVICE_IP = "192.168.4.2"
+
 SHORT_NORMALIZE = (1.0/32768.0)
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
@@ -27,6 +27,19 @@ RATE = 44100
 RECORD_SECONDS = 10
 
 FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+
+def getFileLength(filename):
+    mycmd = getoutput("ffmpeg -i " + filename + " 2>&1 | grep Duration | cut -d ' ' -f 4 | sed s/,// ")
+    return mycmd
+
+def getFiles():
+    """ Gets all audio files in a list"""
+    mypath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "audioCutUps")
+    files = []
+    for (_, _, filenames) in os.walk(mypath):
+        files.extend(filenames)
+        break
+    return files
 
 def get_rms( block ):
     """ c.f. https://stackoverflow.com/questions/36413567/pyaudio-convert-stream-read-into-int-to-get-amplitude#36413872 """
@@ -51,40 +64,93 @@ def get_rms( block ):
 
     return math.sqrt( sum_squares / count )
 
-p = pyaudio.PyAudio()
+def getCutoffs(listInts):
+    cutoffs = []
+    highest = np.max(np.abs(listInts))
+
+    highCutoff = highest / 5
+
+    counter = 0
+    low = True
+    started = 0
+    highLowValues=0
+
+    while counter < len(listInts):
+        
+        if np.abs(listInts[counter]) < highCutoff and low:
+            pass
+        elif np.abs(listInts[counter]) < highCutoff and not low:
+            highLowValues += 1
+            if highLowValues > ALLOWED_DIP_FRAMES:
+                print("Block finished from %.2f to %.2f" % (started*1.0/float(fs) , (counter-ALLOWED_DIP_FRAMES/2)*1.0/float(fs)))
+                cutoffs.append((started, (counter-int(ALLOWED_DIP_FRAMES/2))))
+                low = not low
+                highLowValues = 0
+            
+        elif np.abs(listInts[counter]) >= highCutoff and low:
+            started = copy.deepcopy(counter)
+            highLowValues = 0
+            low = not low
+        elif np.abs(listInts[counter]) >= highCutoff and not low:
+            highLowValues = 0
 
 
+        counter += 1
+    
+    return cutoffs
 
-# Sniff here
+def sniffPackets(time, result):
+    
+    packets = sniff(filter="ip " + DEVICE_IP , timeout=time + RECORD_SECONDS + 10, iface=INTERFACE_NAME)
 
-# Play audio
+    result = packets
+    
+def convertFloatLength(string):
+    hours = string.split(":")[0]
+    minutes = string.split(":")[1]
+    seconds = string.split(":")[2].split(".")[0]
+    return (3600*int(hours) + 60*int(minutes) + int(seconds) + 1)
 
-playlist = [os.path.join(FILE_PATH, "audioCutUps", "AlexaTime1Rec0.wav")]
-command = ["cvlc", "--play-and-exit"]
-command.extend(playlist)
-call(command)
+for file in getFiles():
 
-# Record
+    p = pyaudio.PyAudio()
 
-stream = p.open(format=FORMAT,
-                channels=CHANNELS,
-                rate=RATE,
-                input=True,
-                frames_per_buffer=CHUNK)
+    # Sniff here
 
-print("* recording")
+    result = None
 
-frames = []
+    duration = convertFloatLength(getFileLength(os.path.join(FILE_PATH, "audioCutUps",file)))
 
-for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
-    data = stream.read(CHUNK, exception_on_overflow=False)
-    frames.append(get_rms(data))
+    t = threading.Thread(target=sniffPackets, args=(duration, result ) , name="SniffTraffic")
+    t.start()
 
-print(frames)
+    # Play audio
 
+    playlist = [os.path.join(FILE_PATH, "audioCutUps", file)]
+    command = ["cvlc", "--play-and-exit"]
+    command.extend(playlist)
+    call(command)
 
-xvals = np.arange(len(frames))
+    # Record
 
-plt.plot(xvals, frames)
+    stream = p.open(format=FORMAT,
+                    channels=CHANNELS,
+                    rate=RATE,
+                    input=True,
+                    frames_per_buffer=CHUNK)
 
-plt.show()
+    print("* recording")
+
+    frames = []
+
+    for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
+        data = stream.read(CHUNK, exception_on_overflow=False)
+        frames.append(get_rms(data))
+
+    while result == None:
+        time.sleep(0.5)
+    
+    print(frames)
+    print(result)
+
+#print(frames)
