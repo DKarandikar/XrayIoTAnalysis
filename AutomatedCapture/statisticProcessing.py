@@ -172,19 +172,19 @@ def getCSVWriter(timeData=False):
     if timeData:
         dataFile = "FlowFeaturesTime.csv"
 
-    newFile = not os.path.isfile(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", dataFile))
+    newFile = not os.path.isfile(os.path.join(csvPath, dataFile))
     files =[]
 
     if newFile:
-        output = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  dataFile),'a', newline='')
+        output = open(os.path.join(csvPath,  dataFile),'a', newline='')
         writer = csv.writer(output)
 
     else:
-        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  dataFile), 'r') as csvFile:
+        with open(os.path.join(csvPath,  dataFile), 'r') as csvFile:
             mycsv = csv.reader(csvFile)
                 
 
-        output = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  dataFile),'a', newline='')
+        output = open(os.path.join(csvPath,  dataFile),'a', newline='')
         writer = csv.writer(output)
 
     return writer
@@ -229,7 +229,7 @@ def processPackets(packets, filename, ret=False):
 
     burstNo = 0
 
-    allbursts = []
+    allBursts = []
 
     for burst in bursts:
 
@@ -253,4 +253,4 @@ def processPackets(packets, filename, ret=False):
         burstNo += 1
 
     if ret:
-        return allbursts
+        return allBursts

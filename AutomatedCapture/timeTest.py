@@ -27,9 +27,10 @@ CHUNK = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 44100
-RECORD_SECONDS = 10
+RECORD_SECONDS = 5
+EXTRA_SNIFF_SECONDS = 5
 
-ALLOWED_DIP_FRAMES = RATE
+ALLOWED_DIP_FRAMES = 4
 
 FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
@@ -73,6 +74,8 @@ def getCutoffs(listInts):
     cutoffs = []
     highest = np.max(np.abs(listInts))
 
+    print(len(listInts))
+
     highCutoff = highest / 5
 
     counter = 0
@@ -87,8 +90,8 @@ def getCutoffs(listInts):
         elif np.abs(listInts[counter]) < highCutoff and not low:
             highLowValues += 1
             if highLowValues > ALLOWED_DIP_FRAMES:
-                print("Block finished from %.2f to %.2f" % (started*1.0/float(RATE) , (counter-ALLOWED_DIP_FRAMES/2)*1.0/float(RATE)))
-                cutoffs.append((started, (counter-int(ALLOWED_DIP_FRAMES/2))))
+                print("Block finished from %.2f to %.2f" % (started*1.0*CHUNK/float(RATE) , (counter-ALLOWED_DIP_FRAMES/2)*1.0*CHUNK/float(RATE)))
+                cutoffs.append((started*1.0*CHUNK/float(RATE), (counter-ALLOWED_DIP_FRAMES/2)*1.0*CHUNK/float(RATE)))
                 low = not low
                 highLowValues = 0
             
@@ -108,9 +111,9 @@ def sniffPackets(time):
 
     global result
 
-    print(time + RECORD_SECONDS + 10)
+    print(time + RECORD_SECONDS + EXTRA_SNIFF_SECONDS)
     
-    packets = sniff(filter="ip " + DEVICE_IP , timeout=time + RECORD_SECONDS + 10, iface=INTERFACE_NAME)
+    packets = sniff(filter="ip " + DEVICE_IP , timeout=time + RECORD_SECONDS + EXTRA_SNIFF_SECONDS, iface=INTERFACE_NAME)
 
     result = packets
 
@@ -121,6 +124,12 @@ def convertFloatLength(string):
     minutes = string.split(":")[1]
     seconds = string.split(":")[2].split(".")[0]
     return (3600*int(hours) + 60*int(minutes) + int(seconds) + 1)
+
+def getExactLength(string):
+    hours = string.split(":")[0]
+    minutes = string.split(":")[1]
+    seconds = string.split(":")[2]
+    return (float(3600*int(hours) + 60*int(minutes) + float(seconds)))
 
 def savePackets(packets, filename):
     # Setup the folder
@@ -228,14 +237,18 @@ for file in getFiles():
     responseTimes = []
     for val in cutoffs:
         responseTimes.append(val[1]-val[0])
-    
+    print(cutoffs)
     longestResponse = np.max(responseTimes)
 
     savePackets(result, file.split(".")[0])
 
     statistics = statisticProcessing.processPackets(result, file.split(".")[0], True)
 
-    saveStatistics(statistics, file.split(".")[0], duration, longestResponse)
+    preciseDuration = getExactLength(getFileLength(os.path.join(FILE_PATH, "audioCutUps",file)))
+
+    print(preciseDuration)
+
+    saveStatistics(statistics, file.split(".")[0], preciseDuration, longestResponse)
 
 
 #print(frames)
