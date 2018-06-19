@@ -158,26 +158,33 @@ def getFlowClass(filename):
 
     return flowClass
 
-def getCSVWriter():
+def getCSVWriter(timeData=False):
     ### Setup csv file
-
-    csvPath = os.path.join(FILE_PATH, "data")
+    if timeData:
+        csvPath = os.path.join(FILE_PATH, "timeData")
+    else:
+        csvPath = os.path.join(FILE_PATH, "data")
     if not os.path.exists(csvPath):
         os.makedirs(csvPath)
 
-    newFile = not os.path.isfile(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "Flowfeatures.csv"))
+    dataFile = "Flowfeatures.csv"
+
+    if timeData:
+        dataFile = "FlowFeaturesTime.csv"
+
+    newFile = not os.path.isfile(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", dataFile))
     files =[]
 
     if newFile:
-        output = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "Flowfeatures.csv"),'a', newline='')
+        output = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  dataFile),'a', newline='')
         writer = csv.writer(output)
 
     else:
-        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "Flowfeatures.csv"), 'r') as csvFile:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  dataFile), 'r') as csvFile:
             mycsv = csv.reader(csvFile)
                 
 
-        output = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "Flowfeatures.csv"),'a', newline='')
+        output = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  dataFile),'a', newline='')
         writer = csv.writer(output)
 
     return writer
@@ -213,7 +220,7 @@ def saveStatistics(listListFloats, filename, bNo):
 
         fCounter += 1
 
-def processPackets(packets, filename):
+def processPackets(packets, filename, ret=False):
     bursts = getBursts(packets)
 
     # Seprate out all the flows and get stats 
@@ -221,6 +228,8 @@ def processPackets(packets, filename):
     flowStatistics = []
 
     burstNo = 0
+
+    allbursts = []
 
     for burst in bursts:
 
@@ -236,6 +245,12 @@ def processPackets(packets, filename):
 
         flowStatistics = getStatisticsFromDict(flowLengths, srcdest, flowLengths)
 
-        saveStatistics(flowStatistics, filename, burstNo)
+        if not ret:
+            saveStatistics(flowStatistics, filename, burstNo)
+        else:
+            allBursts.append(flowStatistics)
 
         burstNo += 1
+
+    if ret:
+        return allbursts

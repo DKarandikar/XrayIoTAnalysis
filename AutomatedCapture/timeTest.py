@@ -1,8 +1,10 @@
-import pyaudio, struct, math, datetime, os, threading, time
+import pyaudio, struct, math, datetime, os, threading, time, copy
 import numpy as np
 from scapy.all import sniff, wrpcap
 from subprocess import call, Popen, PIPE, getoutput
 from multiprocessing import Pool
+
+import statisticProcessing
 
 """
 Repeat:
@@ -26,6 +28,8 @@ FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 44100
 RECORD_SECONDS = 10
+
+ALLOWED_DIP_FRAMES = RATE
 
 FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
@@ -83,7 +87,7 @@ def getCutoffs(listInts):
         elif np.abs(listInts[counter]) < highCutoff and not low:
             highLowValues += 1
             if highLowValues > ALLOWED_DIP_FRAMES:
-                print("Block finished from %.2f to %.2f" % (started*1.0/float(fs) , (counter-ALLOWED_DIP_FRAMES/2)*1.0/float(fs)))
+                print("Block finished from %.2f to %.2f" % (started*1.0/float(RATE) , (counter-ALLOWED_DIP_FRAMES/2)*1.0/float(RATE)))
                 cutoffs.append((started, (counter-int(ALLOWED_DIP_FRAMES/2))))
                 low = not low
                 highLowValues = 0
@@ -117,6 +121,65 @@ def convertFloatLength(string):
     minutes = string.split(":")[1]
     seconds = string.split(":")[2].split(".")[0]
     return (3600*int(hours) + 60*int(minutes) + int(seconds) + 1)
+
+def savePackets(packets, filename):
+    # Setup the folder
+    now = datetime.datetime.now()
+    date = "%d-%d-%d" % (now.day, now.month, now.year)
+    packetsPath = os.path.join(FILE_PATH, "savedPackets" + date)
+    if not os.path.exists(packetsPath):
+        os.makedirs(packetsPath)
+
+    # Get the number of this file
+    counter = 0
+    while True:
+        if os.path.isfile(os.path.join(packetsPath, filename + str(counter) + ".pcap")):
+            counter += 1
+        else:
+            break
+
+    # Save the file
+    if len(packets) > 0:
+        wrpcap(os.path.join(packetsPath, filename + str(counter) + ".pcap"), packets)
+        print("Saved file: " + filename + str(counter) + ".pcap")
+
+def saveStatistics(listListListFloats, filename, duration, response):
+    
+    now = datetime.datetime.now()
+    date = "%d-%d-%d" % (now.day, now.month, now.year)
+    packetsPath = os.path.join(FILE_PATH, "savedPackets" + date)
+    counter = 0
+    while True:
+        if os.path.isfile(os.path.join(packetsPath, filename + str(counter) + ".pcap")):
+            counter += 1
+        else:
+            break
+
+
+    for bNo, listListFloats in enumerate(listListListFloats):
+
+        counter -=1
+
+        fCounter = 0
+        for listFloats in listListFloats:
+            row = []
+            row.append(filename + str(counter) + "On" + date + "Burst" + str(bNo) + "Flow" + str(fCounter))
+
+            classNumber = statisticProcessing.getFlowClass(filename)
+
+            row.append(classNumber)
+
+            row.append(duration)
+
+            row.append(response)
+
+            row.extend(listFloats)
+
+            writer = statisticProcessing.getCSVWriter(True)
+
+            writer.writerow(row)
+
+            fCounter += 1
 
 for file in getFiles():
 
@@ -158,9 +221,21 @@ for file in getFiles():
         
     # Wait for sniffing to be done
     t.join()
+
+    # Process
+
+    cutoffs = getCutoffs(frames)
+    responseTimes = []
+    for val in cutoffs:
+        responseTimes.append(val[1]-val[0])
     
-    print(frames)
-    print(result)
+    longestResponse = np.max(responseTimes)
+
+    savePackets(result, file.split(".")[0])
+
+    statistics = statisticProcessing.processPackets(result, file.split(".")[0], True)
+
+    saveStatistics(statistics, file.split(".")[0], duration, longestResponse)
 
 
 #print(frames)
