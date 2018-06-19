@@ -102,13 +102,15 @@ def getCutoffs(listInts):
 
 def sniffPackets(time):
 
+    global result
+
     print(time + RECORD_SECONDS + 10)
     
     packets = sniff(filter="ip " + DEVICE_IP , timeout=time + RECORD_SECONDS + 10, iface=INTERFACE_NAME)
 
     result = packets
 
-    print(result)
+    #print(result)
     
 def convertFloatLength(string):
     hours = string.split(":")[0]
@@ -121,7 +123,7 @@ for file in getFiles():
     p = pyaudio.PyAudio()
 
     # Sniff here
-
+    global result
 
     duration = convertFloatLength(getFileLength(os.path.join(FILE_PATH, "audioCutUps",file)))
 
@@ -158,6 +160,7 @@ for file in getFiles():
     t.join()
     
     print(frames)
+    print(result)
 
 
 #print(frames)
