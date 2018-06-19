@@ -1,4 +1,6 @@
 import pyaudio, struct, math, datetime, os, threading
+import matplotlib
+matplotlib.use('GTK3Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 from scapy.all import sniff, wrpcap
@@ -20,9 +22,9 @@ End sniff, process
 SHORT_NORMALIZE = (1.0/32768.0)
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
-CHANNELS = 2
+CHANNELS = 1
 RATE = 44100
-RECORD_SECONDS = 30
+RECORD_SECONDS = 10
 
 FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
@@ -51,11 +53,7 @@ def get_rms( block ):
 
 p = pyaudio.PyAudio()
 
-stream = p.open(format=FORMAT,
-                channels=CHANNELS,
-                rate=RATE,
-                input=True,
-                frames_per_buffer=CHUNK)
+
 
 # Sniff here
 
@@ -68,12 +66,18 @@ call(command)
 
 # Record
 
+stream = p.open(format=FORMAT,
+                channels=CHANNELS,
+                rate=RATE,
+                input=True,
+                frames_per_buffer=CHUNK)
+
 print("* recording")
 
 frames = []
 
 for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
-    data = stream.read(CHUNK)
+    data = stream.read(CHUNK, exception_on_overflow=False)
     frames.append(get_rms(data))
 
 print(frames)
