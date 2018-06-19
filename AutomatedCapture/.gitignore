@@ -1,4 +1,4 @@
-audioFiles/
+audio*
 m4as/
 testProc.py
 savedPackets*
