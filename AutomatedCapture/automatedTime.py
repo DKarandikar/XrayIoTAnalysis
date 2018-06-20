@@ -222,7 +222,7 @@ def saveAudio(frames, filename):
 
     now = datetime.datetime.now()
     date = "%d-%d-%d" % (now.day, now.month, now.year)
-    packetsPath = os.path.join(FILE_PATH, "savedPackets" + date)
+    audioPath = os.path.join(FILE_PATH, "savedResponses" + date)
     counter = 0
     while True:
         if os.path.isfile(os.path.join(packetsPath, filename + str(counter) + ".pcap")):
@@ -234,7 +234,7 @@ def saveAudio(frames, filename):
 
     output_filename = filename + str(counter) + "On" + date
 
-    wf = wave.open(output_filename, 'wb')
+    wf = wave.open(os.path.joing(audioPath, output_filename), 'wb')
     wf.setnchannels(CHANNELS)
     wf.setsampwidth(p.get_sample_size(FORMAT))
     wf.setframerate(RATE)
