@@ -271,7 +271,11 @@ def maxLengthPacketTimes(packets):
     """
     lengths = []
     for packet in packets:
-        lengths.append(int(packet.len))
+        if 'IP' in packet:
+            try:
+                lengths.append(int(packet.len))
+            except AttributeError:
+                pass
 
     maxLen = max(lengths)
 
@@ -289,11 +293,13 @@ def maxLengthPacketTimes(packets):
                 if DEVICE_IP == str(p[IP].src) and int(p.len) == maxLen:
                     if firstIn:
                         incomingFirst = float(p.time)
+                        firstIn = False
                     else:
                         incomingLast = float(p.time)
                 elif DEVICE_IP == str(p[IP].dst) and int(p.len) == maxLen:
                     if firstOut:
                         outgoingFirst = float(p.time)
+                        firstOut = False
                     else:
                         outgoingLast = float(p.time)
             except IndexError:
