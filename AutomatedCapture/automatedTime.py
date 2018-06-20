@@ -1,4 +1,4 @@
-import pyaudio, struct, math, datetime, os, threading, time, copy
+import pyaudio, struct, math, datetime, os, threading, time, copy, wave
 import numpy as np
 from scapy.all import sniff, wrpcap
 from subprocess import call, Popen, PIPE, getoutput
@@ -27,7 +27,7 @@ CHUNK = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 44100
-RECORD_SECONDS = 5
+RECORD_SECONDS = 15
 EXTRA_SNIFF_SECONDS = 5
 
 ALLOWED_DIP_FRAMES = 4
@@ -35,6 +35,7 @@ ALLOWED_DIP_FRAMES = 4
 FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
 def getFileLength(filename):
+    """ Use ffmpeg to get the length of a file """
     mycmd = getoutput("ffmpeg -i " + filename + " 2>&1 | grep Duration | cut -d ' ' -f 4 | sed s/,// ")
     return mycmd
 
@@ -71,6 +72,10 @@ def get_rms( block ):
     return math.sqrt( sum_squares / count )
 
 def getCutoffs(listInts):
+    """
+    Get a list of tuples which denotes at what time regions of high value
+    occur in the list of Ints, and when they end
+    """
     cutoffs = []
     highest = np.max(np.abs(listInts))
 
@@ -108,6 +113,7 @@ def getCutoffs(listInts):
     return cutoffs
 
 def sniffPackets(time):
+    """ Sniff packets for time plus some extra and save results to a global """
 
     global result
 
@@ -120,18 +126,21 @@ def sniffPackets(time):
     #print(result)
     
 def convertFloatLength(string):
+    """ Convert a string from ffmpeg to an int time in seconds """
     hours = string.split(":")[0]
     minutes = string.split(":")[1]
     seconds = string.split(":")[2].split(".")[0]
     return (3600*int(hours) + 60*int(minutes) + int(seconds) + 1)
 
 def getExactLength(string):
+    """ Convert a string from ffmpeg to an precise float time in seconds """
     hours = string.split(":")[0]
     minutes = string.split(":")[1]
     seconds = string.split(":")[2]
     return (float(3600*int(hours) + 60*int(minutes) + float(seconds)))
 
 def savePackets(packets, filename):
+    """ Save all packets as a pcap to the filename"""
     # Setup the folder
     now = datetime.datetime.now()
     date = "%d-%d-%d" % (now.day, now.month, now.year)
@@ -152,7 +161,12 @@ def savePackets(packets, filename):
         wrpcap(os.path.join(packetsPath, filename + str(counter) + ".pcap"), packets)
         print("Saved file: " + filename + str(counter) + ".pcap")
 
-def saveStatistics(listListListFloats, filename, duration, response):
+def saveStatistics(listListListFloats, filename, duration, response, packetTimes):
+    """ 
+    Save all statistics in the list...Floats, to the filename with duration and response
+    as additional statistical fields
+    list... is a list of bursts, which are lists of flows, which are lists of floats which are the flow statistics 
+    """
     
     now = datetime.datetime.now()
     date = "%d-%d-%d" % (now.day, now.month, now.year)
@@ -163,7 +177,6 @@ def saveStatistics(listListListFloats, filename, duration, response):
             counter += 1
         else:
             break
-
 
     for bNo, listListFloats in enumerate(listListListFloats):
 
@@ -178,9 +191,13 @@ def saveStatistics(listListListFloats, filename, duration, response):
 
             row.append(classNumber)
 
-            row.append(duration)
+            row.append(duration) # Question duration
 
-            row.append(response)
+            row.append(response) # Answer duration
+
+            row.append(packetTimes[0]) # Time between max packets outgoing
+
+            row.append(packetTimes[1]) # Time between max packets incoming
 
             row.extend(listFloats)
 
@@ -190,65 +207,102 @@ def saveStatistics(listListListFloats, filename, duration, response):
 
             fCounter += 1
 
-for file in getFiles():
-
-    p = pyaudio.PyAudio()
-
-    # Sniff here
-    global result
-
-    duration = convertFloatLength(getFileLength(os.path.join(FILE_PATH, "audioCutUps",file)))
-
-    t = threading.Thread(target=sniffPackets, args=(duration, ) , name="SniffTraffic")
-    t.start()
-
-    # Play audio
-
-    playlist = [os.path.join(FILE_PATH, "audioCutUps", file)]
-    command = ["cvlc", "--play-and-exit"]
-    command.extend(playlist)
-    call(command)
-
-    # Record
-
-    stream = p.open(format=FORMAT,
-                    channels=CHANNELS,
-                    rate=RATE,
-                    input=True,
-                    frames_per_buffer=CHUNK)
-
-    print("* recording")
-
-    frames = []
-
-    for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
-        data = stream.read(CHUNK, exception_on_overflow=False)
-        frames.append(get_rms(data))
-
-    stream.stop_stream()
-    stream.close()
-        
-    # Wait for sniffing to be done
-    t.join()
-
-    # Process
-
+def getlongestResponse(frames):
+    """ Gets the length of the longest audio burst in frames"""
     cutoffs = getCutoffs(frames)
     responseTimes = []
     for val in cutoffs:
         responseTimes.append(val[1]-val[0])
-    print(cutoffs)
+    #print(cutoffs)
     longestResponse = np.max(responseTimes)
+    return longestResponse
 
-    savePackets(result, file.split(".")[0])
+def saveAudio(frames, filename):
+    """ Save the response audio"""
 
-    statistics = statisticProcessing.processPackets(result, file.split(".")[0], True)
+    now = datetime.datetime.now()
+    date = "%d-%d-%d" % (now.day, now.month, now.year)
+    packetsPath = os.path.join(FILE_PATH, "savedPackets" + date)
+    counter = 0
+    while True:
+        if os.path.isfile(os.path.join(packetsPath, filename + str(counter) + ".pcap")):
+            counter += 1
+        else:
+            break
 
-    preciseDuration = getExactLength(getFileLength(os.path.join(FILE_PATH, "audioCutUps",file)))
+    counter -= 1
 
-    print(preciseDuration)
+    output_filename = filename + str(counter) + "On" + date
 
-    saveStatistics(statistics, file.split(".")[0], preciseDuration, longestResponse)
+    wf = wave.open(output_filename, 'wb')
+    wf.setnchannels(CHANNELS)
+    wf.setsampwidth(p.get_sample_size(FORMAT))
+    wf.setframerate(RATE)
+    wf.writeframes(b''.join(frames))
+    wf.close()
+
+def main():
+    while True:
+        
+        for file in getFiles():
+
+            # Setup audio
+            p = pyaudio.PyAudio()
+
+            # Start sniffing on other thread
+            global result
+
+            duration = convertFloatLength(getFileLength(os.path.join(FILE_PATH, "audioCutUps",file)))
+
+            t = threading.Thread(target=sniffPackets, args=(duration, ) , name="SniffTraffic")
+            t.start()
+
+            # Play audio
+
+            playlist = [os.path.join(FILE_PATH, "audioCutUps", file)]
+            command = ["cvlc", "--play-and-exit"]
+            command.extend(playlist)
+            call(command)
+
+            # Record as soon as playing done
+
+            stream = p.open(format=FORMAT,
+                            channels=CHANNELS,
+                            rate=RATE,
+                            input=True,
+                            frames_per_buffer=CHUNK)
+
+            print("* recording")
+
+            frames = []
+
+            for i in range(0, int((RATE / CHUNK) * RECORD_SECONDS)):
+                data = stream.read(CHUNK, exception_on_overflow=False)
+                frames.append(get_rms(data))
+
+            stream.stop_stream()
+            stream.close()
+                
+            # Wait for sniffing to be done
+
+            t.join()
+
+            # Process packets and audio
+
+            longestResponse = getLongestResponse(frames)
+
+            packetTimes = statisticsProcessing.maxLengthPacketTimes(result)
+
+            savePackets(result, file.split(".")[0])
+
+            saveAudio(frames, file)
+
+            statistics = statisticProcessing.processPackets(result, file.split(".")[0], True)
+
+            preciseDuration = getExactLength(getFileLength(os.path.join(FILE_PATH, "audioCutUps", file)))
+
+            saveStatistics(statistics, file.split(".")[0], preciseDuration, longestResponse, packetTimes)
 
 
-#print(frames)
+if __name__ == '__main__':
+    main()  

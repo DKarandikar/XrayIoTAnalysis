@@ -4,7 +4,7 @@ from scipy.io import wavfile
 
 def getFiles():
     """ Gets all audio files in a list"""
-    mypath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "audioWav")
+    mypath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "audioFilesWav")
     files = []
     for (_, _, filenames) in os.walk(mypath):
         files.extend(filenames)
@@ -15,7 +15,7 @@ FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
 for file in getFiles():
 
-    fs, data = wavfile.read(os.path.join(FILE_PATH, "audioWav", file))
+    fs, data = wavfile.read(os.path.join(FILE_PATH, "audioFilesWav", file))
 
     ALLOWED_DIP_FRAMES = fs
 

@@ -190,6 +190,10 @@ def getCSVWriter(timeData=False):
     return writer
 
 def saveStatistics(listListFloats, filename, bNo):
+    """
+    Save statistics in list of flows which are lists of floats under filename
+    with the burst number given by bNo, save in normal data directory
+    """
     
     now = datetime.datetime.now()
     date = "%d-%d-%d" % (now.day, now.month, now.year)
@@ -221,6 +225,10 @@ def saveStatistics(listListFloats, filename, bNo):
         fCounter += 1
 
 def processPackets(packets, filename, ret=False):
+    """
+    Process packets and save under filename with rows in a csv in the normal data directory
+    If ret is True, don't save and return as a list of bursts of flows of statistics 
+    """
     bursts = getBursts(packets)
 
     # Seprate out all the flows and get stats 
@@ -254,3 +262,41 @@ def processPackets(packets, filename, ret=False):
 
     if ret:
         return allBursts
+
+
+def maxLengthPacketTimes(packets):
+    """
+    Get the time between first and last incoming and outgoing packets of max size (1514 for scapy)
+    Returns a pair of lengths
+    """
+    lengths = []
+    for packet in packets:
+        lengths.append(int(packet.len))
+
+    maxLen = max(lengths)
+
+    firstIn = True
+    firstOut = True
+
+    incomingFirst = 0
+    incomingLast = 0
+    outgoingFirst = 0
+    outgoingLast = 0
+
+    for p in packets:
+        if 'IP' in p:
+            try:
+                if DEVICE_IP == str(p[IP].src) and int(p.len) == maxLen:
+                    if firstIn:
+                        incomingFirst = float(p.time)
+                    else:
+                        incomingLast = float(p.time)
+                elif DEVICE_IP == str(p[IP].dst) and int(p.len) == maxLen:
+                    if firstOut:
+                        outgoingFirst = float(p.time)
+                    else:
+                        outgoingLast = float(p.time)
+            except IndexError:
+                pass
+
+    return (outgoingLast - outgoingFirst, incomingLast - incomingFirst)
