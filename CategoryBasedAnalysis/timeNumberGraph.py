@@ -4,19 +4,18 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import scipy.stats
 
-outgoing = False
-binSameDuration = True
+outgoing = True
+binSameDuration = True  # Bin categories 
 
 ROUNDING_DP = 2
 
 ORIGINAL_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataProc", "data",  "FlowFeaturesTime (1).csv")
 
 durations = np.genfromtxt(ORIGINAL_DATA, delimiter=",", usecols=2)
-
 number = np.genfromtxt(ORIGINAL_DATA, delimiter=",", usecols=23)
-
 category = np.genfromtxt(ORIGINAL_DATA, delimiter=",", usecols=1)
 
+""" DEPRACATED 
 removedDur = []
 removedNum = []
 
@@ -25,7 +24,7 @@ for index in range(len(durations)):
         removedDur.append(durations[index])
         removedNum.append(number[index])
 
-print(scipy.stats.linregress(removedDur, removedNum))
+print(scipy.stats.linregress(removedDur, removedNum)) """
 
 if outgoing == False:
     durations = np.genfromtxt(ORIGINAL_DATA, delimiter=",", usecols=3)
@@ -34,13 +33,15 @@ if outgoing == False:
 
 if binSameDuration:
     
+    # First sort by duration then by category
     tupDat = []
     for index in range(len(durations)):
         tupDat.append((round(durations[index],ROUNDING_DP), number[index], category[index]))
 
     tupDat = sorted(tupDat, key=lambda tup: (tup[0],tup[2]) )
 
-    #print(tupDat)
+
+    # Next setup the lists again (extract from tuples)
 
     durations = []
     number = []
@@ -51,7 +52,7 @@ if binSameDuration:
         number.append(tupDat[index][1])
         category.append(tupDat[index][2])
 
-    #print(durations)
+    # Setup new lists
 
     newNum = []
     newErr = []
@@ -60,10 +61,15 @@ if binSameDuration:
 
     index = 0
 
+    # Go through the entries in order 
+
     while index < len(durations) - 1:
         thisDur = durations[index]
         thisCat = category[index]
         theseNum = [number[index]]
+
+        # If more than one matches on category and duration add to list 
+
         try:
             while durations[index + 1] == thisDur and category[index + 1] == thisCat:
                 if number[index+1] > 50:
@@ -74,6 +80,7 @@ if binSameDuration:
 
         newDur.append(thisDur)
         newCat.append(thisCat)
+        # Get means and std of these lists 
         newNum.append(np.mean(theseNum))
         newErr.append(np.std(theseNum))
         index += 1
@@ -82,6 +89,8 @@ if binSameDuration:
     #print(newCat)
 
     data = []
+
+    # Sort into numpy arrays in order of category 
 
     for value in [i for i in range(1,12)]:
         this = []
@@ -95,7 +104,7 @@ if binSameDuration:
                 errs.append(newErr[index])
         data.append((np.array(durs),np.array(nums), np.array(errs)))
 
-    #print(data)
+    #Print pearson correlation coefficients for each category 
 
     for index, p in enumerate(data):
         x,y,z = p
@@ -106,6 +115,7 @@ if binSameDuration:
 
 else:
     
+    # Just sort into numpy arrays on category basis 
 
     data = []
 
@@ -119,14 +129,18 @@ else:
                 nums.append(number[index])
         data.append((np.array(durs),np.array(nums)))
             
+# Get groups and colours
+
 groups = [str(i) for i in range(1,12)]
 
-colors = cm.rainbow(np.linspace(0, 1, len(groups)))
+colors = cm.rainbow(np.linspace(0, 1, len(groups))) 
 
 
 #x = np.arange(len(test)) 
 
 if binSameDuration:
+    
+    # If binned use errorbar plots
     
     for data, color, group in zip(tuple(data), tuple(colors), tuple(groups)):
         #print(data)
@@ -145,6 +159,8 @@ if binSameDuration:
     plt.show()
     
 else:
+    
+    # If not binned use scatter plots
 
     for data, color, group in zip(tuple(data), tuple(colors), tuple(groups)):
         #print(data)
