@@ -6,7 +6,10 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import ExtraTreesClassifier, RandomForestClassifier, GradientBoostingClassifier, AdaBoostClassifier, VotingClassifier
 
 NUMBER_COLUMNS = 56
-ORIGINAL_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataProc", "data",  "FlowFeaturesCombined.csv")
+ORIGINAL_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataProc", "data",  "FlowFeatures.csv")
+
+NUMBER_COLUMNS = 60
+ORIGINAL_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataProc", "data",  "FlowFeaturesTime.csv")
 
 def fitAndPrint(classifier, data, target):
     """ 
@@ -18,6 +21,13 @@ def fitAndPrint(classifier, data, target):
     indices = np.argsort(importances)[::-1]
 
     featureNames = []
+
+    if NUMBER_COLUMNS == 60:
+        featureNames.append("QuestionTime")
+        featureNames.append("ResponseTime")
+        featureNames.append("OutgoingMaxGapTime")
+        featureNames.append("IncomingMaxGapTime")
+
     for z in ["OUT", "IN", "BOTH"]:
         
         featureNames.append(z + "Min")
