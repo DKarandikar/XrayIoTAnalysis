@@ -5,16 +5,16 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 NUMBER_COLUMNS = 14
-DATA_FILENAME = "normalizedPCACombined.csv"
-SAVE = False
+DATA_FILENAME = "normalizedPCACD.csv"
+SAVE = True
 PICKLE_ACCURACIES = False
 
 COMBINE_LIGHTS = True
 ONLY_KEY_CATEGORIES = True # Only Time, Shopping, Joke, LightsCombined and Alarms
 
 HIDDEN_NODES = 20
-SAVE_INTERVAL = 1000
-TOTAL_EPOCHS = 20000
+SAVE_INTERVAL = 500
+TOTAL_EPOCHS = 1500
 
 RANDOM_SEED = 83
 

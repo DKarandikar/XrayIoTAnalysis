@@ -4,8 +4,8 @@ import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
-ORIGINAL_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "FlowFeatures.csv")
-OUTPUT_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalizedPCA.csv")
+ORIGINAL_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "FlowFeaturesCherylDan.csv")
+OUTPUT_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalizedPCACD.csv")
 
 # Read in the data 
 unNomralized = np.genfromtxt(ORIGINAL_DATA, delimiter=",", usecols=[x for x in range(2,56)])

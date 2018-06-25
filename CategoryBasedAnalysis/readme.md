@@ -5,6 +5,11 @@
 3. Run `normaliseData.py` to min/max normalize all columns into [0,1]
 4. Run the `basicNN.py` to train on the extracted flows
 
+For PCA do the following:
+
+1. Run `dataProc/pcaDataExtraction.py` after uncommenting the relevant output
+2. Run `pcaNN.py` to train the NN on the refined data
+
 ## Categories
 
 Category Numbers are:

@@ -1,14 +1,20 @@
 import statistics, pyshark, os
 import matplotlib.pyplot as plt
 
-pkts = pyshark.FileCapture(os.path.join(os.path.dirname(os.path.abspath(__file__)), "pcaps", "AlexaNews0.pcap"))
+pkts = pyshark.FileCapture(os.path.join(os.path.dirname(os.path.abspath(__file__)), "pcaps", "HuePhoneOnOff1"))
 
-DEVICE_IP = "192.168.4.2"
+DEVICE_IP = "192.168.4.16"
 PHONE_IP = "192.168.4.19"
 
 IGNORE_PHONE = False
+TIME_INTERVAL = True
+
+START_TIME = 79
+END_TIME = 124
 
 initialTime = float(pkts[0].sniff_timestamp)
+
+#print(initialTime)
 
 inTimes = []
 inSize = []
@@ -21,12 +27,14 @@ for p in pkts:
         #print(p.sniff_timestamp)
         try:
             if (IGNORE_PHONE and p['ip'].src != PHONE_IP and p['ip'].dst != PHONE_IP) or not IGNORE_PHONE:
-                if p['ip'].src == DEVICE_IP:
-                    outTimes.append(float(p.sniff_timestamp) - initialTime)
-                    outSize.append(int(p.length))
-                else:
-                    inTimes.append(float(p.sniff_timestamp) - initialTime)
-                    inSize.append(int(p.length))
+                #print(float(p.sniff_timestamp) - initialTime)
+                if (TIME_INTERVAL and float(p.sniff_timestamp) - initialTime < END_TIME and float(p.sniff_timestamp) - initialTime > START_TIME) or not TIME_INTERVAL:
+                    if p['ip'].src == DEVICE_IP:
+                        outTimes.append(float(p.sniff_timestamp) - initialTime)
+                        outSize.append(int(p.length))
+                    else:
+                        inTimes.append(float(p.sniff_timestamp) - initialTime)
+                        inSize.append(int(p.length))
         except AttributeError:
             print("Attribute Error")
 
