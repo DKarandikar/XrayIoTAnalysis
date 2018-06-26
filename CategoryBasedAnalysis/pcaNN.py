@@ -6,15 +6,17 @@ from sklearn.model_selection import train_test_split
 
 NUMBER_COLUMNS = 14
 DATA_FILENAME = "normalizedPCACD.csv"
-SAVE = True
+SAVE = False
 PICKLE_ACCURACIES = False
 
 COMBINE_LIGHTS = True
 ONLY_KEY_CATEGORIES = True # Only Time, Shopping, Joke, LightsCombined and Alarms
 
+RANDOMISE_DATA = True # Randomise all classes to see if too much structure 
+
 HIDDEN_NODES = 20
 SAVE_INTERVAL = 500
-TOTAL_EPOCHS = 1500
+TOTAL_EPOCHS = 100
 
 RANDOM_SEED = 83
 
@@ -105,7 +107,10 @@ def get_data():
 
         for index, value in enumerate(target):
             if value in [9, 1, 10, 8, 3]:
-                newTarget[tick] = value
+                if RANDOMISE_DATA:
+                    newTarget[tick] = random.choice([9, 1, 10, 8, 3])
+                else:
+                    newTarget[tick] = value
                 newData[tick, :] = data[index, :]
                 tick += 1
 
