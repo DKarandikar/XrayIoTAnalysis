@@ -1,13 +1,13 @@
 import statistics, pyshark, os
 import matplotlib.pyplot as plt
 
-pkts = pyshark.FileCapture(os.path.join(os.path.dirname(os.path.abspath(__file__)), "pcaps", "HuePhoneOnOff1"))
+pkts = pyshark.FileCapture(os.path.join(os.path.dirname(os.path.abspath(__file__)), "pcaps", "AlexaJoke1"))
 
-DEVICE_IP = "192.168.4.16"
+DEVICE_IP = "192.168.4.2"
 PHONE_IP = "192.168.4.19"
 
 IGNORE_PHONE = False
-TIME_INTERVAL = True
+TIME_INTERVAL = False
 
 START_TIME = 79
 END_TIME = 124
