@@ -1,7 +1,7 @@
 import statistics, pyshark, os
 import matplotlib.pyplot as plt
 
-pkts = pyshark.FileCapture(os.path.join(os.path.dirname(os.path.abspath(__file__)), "pcaps", "AlexaJoke1"))
+pkts = pyshark.FileCapture(os.path.join(os.path.dirname(os.path.abspath(__file__)), "pcaps", "GoogleHomeBackground1.pcap"))
 
 DEVICE_IP = "192.168.4.2"
 PHONE_IP = "192.168.4.19"
