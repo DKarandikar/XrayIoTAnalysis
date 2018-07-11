@@ -1,4 +1,4 @@
-import os, csv, _thread
+import os, csv, _thread, pickle
 import numpy as np
 import pandas as pd
 import pyshark
@@ -11,6 +11,8 @@ DEVICE_IP = "192.168.4.2"
 BURST_PACKET_NO_CUTOFF = 60
 BURST_TIME_INTERVAL = 1.0
 FLOW_SIZE_CUTOFF = 10   # Minimum number of packets to be counted as a valid flow
+
+FILE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 
 # Setup the capture
@@ -45,13 +47,12 @@ def getIps(burst):
     srcdest = set()
 
     for p in burst:
-        if 'IP' in p:
-            try:
-                source = str(p['ip'].src)
-                destination = str(p['ip'].dst)
-                srcdest.add((source, destination))
-            except AttributeError:
-                print("Attribute error")
+        try:
+            source = str(p.source)
+            destination = str(p.destination)
+            srcdest.add((source, destination))
+        except AttributeError:
+            print("Attribute error")
         
         
     srcdest = list(srcdest)
@@ -70,12 +71,11 @@ def getFlowDict(sourcedest, burst):
             dest = pair[1]
 
             for p in burst:
-                if 'IP' in p:
-                    try:
-                        if str(p['ip'].src) == source and str(p['ip'].dst) == dest:
-                            flowLens.append(int(p.length))
-                    except AttributeError:
-                        print("Attribute error")
+                try:
+                    if str(p.source) == source and str(p.destination) == dest:
+                        flowLens.append(int(p.length))
+                except AttributeError:
+                    print("Attribute error")
             
 
             flowDict[pair] = (flowLens)
@@ -178,7 +178,7 @@ for packet in capture.sniff_continuously():
     else:
         if (float(packet.time) - currentTime) < BURST_TIME_INTERVAL:
             nextBurst.append(packet)
-            print("Appending")
+            #print("Appending")
             currentTime = float(packet.time)
         else:
             if len(nextBurst) > BURST_PACKET_NO_CUTOFF:

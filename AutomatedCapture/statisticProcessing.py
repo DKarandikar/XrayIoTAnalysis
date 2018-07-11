@@ -4,7 +4,7 @@ from scapy.all import IP
 
 DEVICE_IP = "192.168.4.2"
 BURST_PACKET_NO_CUTOFF = 60
-BURST_TIME_INTERVAL = 0.5
+BURST_TIME_INTERVAL = 1
 FLOW_SIZE_CUTOFF = 20   # Minimum number of packets to be counted as a valid flow
 FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
