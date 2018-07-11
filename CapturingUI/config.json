@@ -1,6 +1,7 @@
 {
     "home_ip": "192.168",
-    "interface_name": "Intel(R) Dual Band Wireless-AC 3165",
+    "interface_name": "wlan0",
     "altInt": "Realtek PCIe GBE Family Controller",
+    "alt2": "Intel(R) Dual Band Wireless-AC 3165",
     "only_summaries": "True" 
 }

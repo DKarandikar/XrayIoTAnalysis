@@ -30,7 +30,7 @@ RATE = 44100
 RECORD_SECONDS = 15
 EXTRA_SNIFF_SECONDS = 5
 
-ALLOWED_DIP_FRAMES = 200
+ALLOWED_DIP_FRAMES = 500
 
 FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
@@ -71,7 +71,7 @@ def get_rms( block ):
 
     return math.sqrt( sum_squares / count )
 
-def getCutoffs(listInts):
+def getCutoffs(listInts, allowed_dip = ALLOWED_DIP_FRAMES):
     """
     Get a list of tuples which denotes at what time regions of high value
     occur in the list of Ints, and when they end
@@ -94,9 +94,9 @@ def getCutoffs(listInts):
             pass
         elif np.abs(listInts[counter]) < highCutoff and not low:
             highLowValues += 1
-            if highLowValues > ALLOWED_DIP_FRAMES:
-                print("Block finished from %.2f to %.2f" % (started*1.0*CHUNK/float(RATE) , (counter-ALLOWED_DIP_FRAMES/2)*1.0*CHUNK/float(RATE)))
-                cutoffs.append((started*1.0*CHUNK/float(RATE), (counter-ALLOWED_DIP_FRAMES/2)*1.0*CHUNK/float(RATE)))
+            if highLowValues > allowed_dip:
+                print("Block finished from %.2f to %.2f" % (started*1.0*CHUNK/float(RATE) , (counter-allowed_dip/2)*1.0*CHUNK/float(RATE)))
+                cutoffs.append((started*1.0*CHUNK/float(RATE), (counter-allowed_dip/2)*1.0*CHUNK/float(RATE)))
                 low = not low
                 highLowValues = 0
             
@@ -207,9 +207,12 @@ def saveStatistics(listListListFloats, filename, duration, response, packetTimes
 
             fCounter += 1
 
-def getLongestResponse(frames):
+def getLongestResponse(frames, file):
     """ Gets the length of the longest audio burst in frames"""
-    cutoffs = getCutoffs(frames)
+    if "Joke" in file:
+        cutoffs = getCutoffs(frames, ALLOWED_DIP_FRAMES*2)
+    else:
+        cutoffs = getCutoffs(frames)
     responseTimes = []
     for val in cutoffs:
         responseTimes.append(val[1]-val[0])
@@ -226,7 +229,7 @@ def saveAudio(frames, filename, p):
     packetsPath = os.path.join(FILE_PATH, "savedPackets" + date)
     counter = 0
     while True:
-        if os.path.isfile(os.path.join(packetsPath, filename + str(counter) + ".pcap")):
+        if os.path.isfile(os.path.join(packetsPath, filename.split(".")[0] + str(counter) + ".pcap")):
             counter += 1
         else:
             break
@@ -297,7 +300,7 @@ def main():
 
             # Process packets and audio
 
-            longestResponse = getLongestResponse(frames)
+            longestResponse = getLongestResponse(frames, file)
 
             packetTimes = statisticProcessing.maxLengthPacketTimes(result)
 
