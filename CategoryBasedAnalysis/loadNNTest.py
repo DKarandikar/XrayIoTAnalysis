@@ -12,11 +12,11 @@ from tensorflow.python.tools.inspect_checkpoint import print_tensors_in_checkpoi
 
 RANDOM_SEED = 83
 MODELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
-MODEL_META_FILENAME = "model_normalizedPCA-3000.meta"
+MODEL_META_FILENAME = "model_normalizedPCAGoogle-3500.meta"
 NUMBER_HIDDEN_NODES = 20
 
-DATA_FILENAME = "normalizedPCA.csv"
-NUMBER_COLUMNS = 14
+DATA_FILENAME = "normalizedPCAGoogle.csv"
+NUMBER_COLUMNS = 20
 NP_SAVE = False
 
 COMBINE_LIGHTS = True

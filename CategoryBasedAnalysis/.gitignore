@@ -4,5 +4,5 @@
 ResultsNoNoiseTwotoFive.docx
 /backup
 models
-testAccuracies.p
-trainAccuracies.p
+/testAccuracies.p
+/trainAccuracies.p

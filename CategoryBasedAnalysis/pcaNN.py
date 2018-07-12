@@ -4,19 +4,19 @@ import numpy as np
 import pandas as pd 
 from sklearn.model_selection import train_test_split
 
-NUMBER_COLUMNS = 14
-DATA_FILENAME = "normalizedPCACD.csv"
-SAVE = False
-PICKLE_ACCURACIES = False
+NUMBER_COLUMNS = 20
+DATA_FILENAME = "normalizedPCAGoogle.csv"
+SAVE = True
+PICKLE_ACCURACIES = True
 
 COMBINE_LIGHTS = True
 ONLY_KEY_CATEGORIES = True # Only Time, Shopping, Joke, LightsCombined and Alarms
 
-RANDOMISE_DATA = True # Randomise all classes to see if too much structure
+RANDOMISE_DATA = False # Randomise all classes to see if too much structure, only do with only_key and combine on
 
 HIDDEN_NODES = 20
 SAVE_INTERVAL = 500
-TOTAL_EPOCHS = 100
+TOTAL_EPOCHS = 5000
 
 RANDOM_SEED = 83
 
@@ -24,7 +24,6 @@ DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataP
 MODEL_FILENAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models",  "model_" + DATA_FILENAME.split(".")[0])
 
 onlyIncoming = False
-
 try:
     if sys.argv[1] == "incOnly":
         onlyIncoming = True
