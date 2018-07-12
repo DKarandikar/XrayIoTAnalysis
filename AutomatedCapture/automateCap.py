@@ -2,7 +2,7 @@
 Get audio files, run to > 20 mins
 While that occurs, capture traffic, then save as PCAP with name of audio
 """
-import os, threading, math, datetime
+import os, threading, math, datetime, gc
 from scapy.all import sniff, wrpcap
 from subprocess import call, Popen, PIPE, getoutput
 
@@ -10,8 +10,15 @@ import statisticProcessing
 
 INTERFACE_NAME = "wlan0"
 DEVICE_IP = "192.168.4.2"
-SESSION_LENGTH = 1200 # Max seconds to play
+SESSION_LENGTH = 600 # Max seconds to play, 1200 for Alexa is ok, 600 better for Google Home 
 FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+
+FILE_LENGTHS = {'GoogleLightsBrightDim30sec.m4a': "00:00:30.99",
+                'GoogleShoppingList1min.m4a': "00:01:01.99",
+                'GoogleJoke1Min.m4a': "00:01:01.99",
+                'GoogleTime1Min.m4a': "00:01:01.99",
+                'GoogleAlarms1min.m4a': "00:01:01.99",
+                'GoogleLightsOnOff30sec.m4a': "00:00:30.99"}
 
 
 def getFiles():
@@ -33,8 +40,12 @@ def loopSong(filename, plays):
     call(command)
 
 def getFileLength(filename):
-    mycmd = getoutput("ffmpeg -i " + filename + " 2>&1 | grep Duration | cut -d ' ' -f 4 | sed s/,// ")
-    return mycmd
+    if filename in FILE_LENGTHS.keys():
+        return FILE_LENGTHS[filename]
+    else:
+        mycmd = getoutput("ffmpeg -i " + filename + " 2>&1 | grep Duration | cut -d ' ' -f 4 | sed s/,// ")
+        FILE_LENGTHS[filename] = mycmd
+        return mycmd
 
 def convertFloatLength(string):
     hours = string.split(":")[0]
@@ -73,23 +84,29 @@ def savePackets(packets, filename):
         wrpcap(os.path.join(packetsPath, filename + str(counter) + ".pcap"), packets)
         print("Saved file: " + filename + str(counter) + ".pcap")
 
+def playAndSave(fullPath, file):
+    """ Play full path, capture, process and save """
+    time = playForLessXMins(fullPath)
+
+    print("Capturing for " + str(time + 15) + " seconds")
+
+    packets = sniff(filter="ip " + DEVICE_IP , timeout=time + 15, iface=INTERFACE_NAME)
+
+    savePackets(packets, file.split(".")[0])
+
+    statisticProcessing.processPackets(packets, file.split(".")[0])
 
 def main():
     try:
+        #print(getFiles())
         while True:
             for file in getFiles():
                 
                 fullPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "audioFiles", file)
 
-                time = playForLessXMins(fullPath)
+                playAndSave(fullPath, file)
 
-                print("Capturing for " + str(time + 15) + " seconds")
-
-                packets = sniff(filter="ip " + DEVICE_IP , timeout=time + 15, iface=INTERFACE_NAME)
-
-                savePackets(packets, file.split(".")[0])
-
-                statisticProcessing.processPackets(packets, file.split(".")[0])
+                gc.collect()
 
     except KeyboardInterrupt:
         print("Interrupted")
