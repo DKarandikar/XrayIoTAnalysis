@@ -5,14 +5,14 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 NUMBER_COLUMNS = 20
-DATA_FILENAME = "normalizedPCAGoogle.csv"
-SAVE = True
-PICKLE_ACCURACIES = True
+DATA_FILENAME = "normalizedPCAGoogleBig.csv"
+SAVE = False
+PICKLE_ACCURACIES = False
 
 COMBINE_LIGHTS = True
 ONLY_KEY_CATEGORIES = True # Only Time, Shopping, Joke, LightsCombined and Alarms
 
-RANDOMISE_DATA = False # Randomise all classes to see if too much structure, only do with only_key and combine on
+RANDOMISE_DATA = True # Randomise all classes to see if too much structure, only do with only_key and combine on
 
 HIDDEN_NODES = 20
 SAVE_INTERVAL = 500
