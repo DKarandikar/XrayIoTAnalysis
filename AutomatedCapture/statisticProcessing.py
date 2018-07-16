@@ -131,7 +131,15 @@ def getStatisticsFromDict(flowDict, sourceDest, lengthDict):
     return result
 
 def getFlowClass(filename):
-    if "Timers" in filename:
+    if "WeatherBham" in filename:
+        flowClass = "21"
+    elif "WeatherLondon" in filename:
+        flowClass = "22"
+    elif "WeatherNewYork" in filename:
+        flowClass = "23"
+    elif "WeatherParis" in filename:
+        flowClass = "24"
+    elif "Timers" in filename:
         flowClass = "7"
     elif "Weather" in filename:
         flowClass = "2"
