@@ -12,15 +12,17 @@ from tensorflow.python.tools.inspect_checkpoint import print_tensors_in_checkpoi
 
 RANDOM_SEED = 83
 MODELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
-MODEL_META_FILENAME = "model_normalizedPCAGoogle-3500.meta"
-NUMBER_HIDDEN_NODES = 20
+MODEL_META_FILENAME = "model_normalizedPCAWeatherDeltas-1500.meta"
+NUMBER_HIDDEN_NODES = 15
 
-DATA_FILENAME = "normalizedPCAGoogle.csv"
-NUMBER_COLUMNS = 20
+DATA_FILENAME = "normalizedPCAWeatherDeltas.csv"
+NUMBER_COLUMNS = 26
 NP_SAVE = False
 
-COMBINE_LIGHTS = True
-ONLY_KEY_CATEGORIES = True # Only Time, Shopping, Joke, LightsCombined and Alarms
+COMBINE_LIGHTS = False
+ONLY_KEY_CATEGORIES = False # Only Time, Shopping, Joke, LightsCombined and Alarms
+
+WEATHER_CATEGORIES = True # Use if categories are 21, 22, 23, 24 
 
 onlyIncoming = False
 DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataProc", "data", DATA_FILENAME )
@@ -116,6 +118,13 @@ def get_data():
         data = newData
         target = newTarget
 
+    if WEATHER_CATEGORIES:
+        newTarget = np.zeros(shape = target.shape, dtype=int)
+        for index, value in enumerate(target):
+            newTarget[index] = value - 20
+
+        target = newTarget
+
     #print(data.shape)
 
     #data /= np.max(np.abs(data)+0.0000001, axis=0)
@@ -132,7 +141,7 @@ def get_data():
     # Convert into one-hot vectors
     all_Y = np.zeros((target.size, target.max()+1))
     all_Y[np.arange(target.size), target] = 1
-    train_X, test_X, train_y, test_y = train_test_split(all_X, all_Y, test_size=0.33, random_state=RANDOM_SEED)
+    train_X, test_X, train_y, test_y = train_test_split(all_X, all_Y, test_size=0.2, random_state=RANDOM_SEED)
     #print(train_y)
     return train_X, test_X, train_y, test_y
 

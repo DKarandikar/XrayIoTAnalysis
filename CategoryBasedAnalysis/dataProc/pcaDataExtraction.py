@@ -4,21 +4,31 @@ import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
-ORIGINAL_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "GoogleFlowfeaturesBig.csv")
-OUTPUT_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalizedPCAGoogleBig.csv")
+ORIGINAL_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "FlowfeaturesDeltas.csv")
+OUTPUT_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "normalizedPCAWeatherDeltasOut.csv")
 
 # Read in the data 
-unNomralized = np.genfromtxt(ORIGINAL_DATA, delimiter=",", usecols=[x for x in range(2,56)])
+unNomralized = np.genfromtxt(ORIGINAL_DATA, delimiter=",", usecols=[x for x in range(2,56 -36)]+[x for x in range(57, 56 + 18)])
 scaler = StandardScaler()
 scaler.fit(unNomralized)
 normalized = scaler.transform(unNomralized)
 
 # Perform PCA on it
-pca = PCA(n_components=18)
+pca = PCA(n_components=14)
+
 # 12 components gets 0.97890031 of the variance using .cumsum()
+# 12 for weather Alexa gives 0.97050849 of variance 
+# 6 components for weather Alexa OUT only gives 0.97186234
 # 18 components gets 0.97605086 for google home of the variance using .cumsum()
 
+# 24 for delta Data gives 0.97640022
+# 14 for delta Out gives 0.97685787
+
+#pca = PCA()#
+
 principalComponents = pca.fit_transform(normalized)
+
+print(pca.explained_variance_ratio_.cumsum())
 
 # Rescale the data after transformation
 scaler2 = StandardScaler()

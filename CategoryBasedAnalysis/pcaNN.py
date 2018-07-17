@@ -2,21 +2,31 @@ import tensorflow as tf
 import random, os, pickle, sys, time
 import numpy as np
 import pandas as pd 
+import itertools
 from sklearn.model_selection import train_test_split
 
-NUMBER_COLUMNS = 20
-DATA_FILENAME = "normalizedPCAGoogleBig.csv"
-SAVE = False
-PICKLE_ACCURACIES = False
+HYPERSEARCH = True # Whether or not to do hyperparameter search 
+REGULARIZE = True # Apply regularization
 
-COMBINE_LIGHTS = True
-ONLY_KEY_CATEGORIES = True # Only Time, Shopping, Joke, LightsCombined and Alarms
+NUMBER_COLUMNS = 26
+DATA_FILENAME = "normalizedPCAWeatherDeltas.csv"
 
-RANDOMISE_DATA = True # Randomise all classes to see if too much structure, only do with only_key and combine on
-
-HIDDEN_NODES = 20
+HIDDEN_NODES = 15
 SAVE_INTERVAL = 500
-TOTAL_EPOCHS = 5000
+TOTAL_EPOCHS = 500
+
+SAVE = True
+PICKLE_ACCURACIES = True
+
+COMBINE_LIGHTS = False
+ONLY_KEY_CATEGORIES = False # Only Time, Shopping, Joke, LightsCombined and Alarms
+WEATHER_CATEGORIES = True # Use if categories are 21, 22, 23, 24 
+
+REGULARIZER = "L1" # Either "L1" or "L2" is the default
+SCALE = 0.005 # Scale for regularizer 
+REGULARIZE_WEIGHTS = "" # Either "Both" or default is only w_2 
+
+RANDOMISE_DATA = False # Randomise all classes to see if too much structure, only do with only_key and combine on
 
 RANDOM_SEED = 83
 
@@ -116,6 +126,13 @@ def get_data():
         data = newData
         target = newTarget
 
+    if WEATHER_CATEGORIES:
+        newTarget = np.zeros(shape = target.shape, dtype=int)
+        for index, value in enumerate(target):
+            newTarget[index] = value - 20
+
+        target = newTarget
+
 
     #print(data.shape)
     
@@ -135,7 +152,7 @@ def get_data():
     train_X, test_X, train_y, test_y = train_test_split(all_X, all_Y, test_size=0.2, random_state=RANDOM_SEED)
     return train_X, test_X, train_y, test_y
 
-def main():
+def runNN(printing=True):
     
     train_X, test_X, train_y, test_y = get_data()
 
@@ -162,6 +179,26 @@ def main():
     cost    = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=yhat))
     updates = tf.train.GradientDescentOptimizer(0.01).minimize(cost)
 
+    if REGULARIZE:
+        if REGULARIZER == "L1":
+            regularizer = tf.contrib.layers.l1_regularizer(
+                scale=SCALE, scope=None
+            )
+        else:
+            regularizer = tf.contrib.layers.l2_regularizer(
+                scale=SCALE, scope=None
+            )
+        
+        weights = tf.trainable_variables() # all vars of your graph
+
+        if REGULARIZE_WEIGHTS = "Both":
+            regularization_penalty = tf.contrib.layers.apply_regularization(regularizer, [w_1, w_2])
+        else:
+            regularization_penalty = tf.contrib.layers.apply_regularization(regularizer, [w_2])
+
+        cost = cost + regularization_penalty
+        updates = tf.train.GradientDescentOptimizer(0.01).minimize(cost)
+
     trainAccuracy = []
     testAccuracy = []
 
@@ -182,11 +219,11 @@ def main():
                                     sess.run(predict, feed_dict={X: train_X, y: train_y, keep_prob: 1}))
             test_accuracy  = np.mean(np.argmax(test_y, axis=1) ==
                                     sess.run(predict, feed_dict={X: test_X, y: test_y, keep_prob: 1}))
-
-            print("Epoch = %d, train accuracy = %.2f%%, test accuracy = %.2f%%"
-                % (epoch + 1, 100. * train_accuracy, 100. * test_accuracy))
-            timeLeft = ((time.time()-startTime) * (TOTAL_EPOCHS-epoch) * 1.0/(epoch+1) *1.0)
-            print("Estimated time left is %.2f seconds" % timeLeft )
+            if printing:
+                print("Epoch = %d, train accuracy = %.2f%%, test accuracy = %.2f%%"
+                    % (epoch + 1, 100. * train_accuracy, 100. * test_accuracy))
+                timeLeft = ((time.time()-startTime) * (TOTAL_EPOCHS-epoch) * 1.0/(epoch+1) *1.0)
+                print("Estimated time left is %.2f seconds" % timeLeft )
 
             testAccuracy.append(100. * train_accuracy)
             trainAccuracy.append(100. * test_accuracy)
@@ -200,12 +237,49 @@ def main():
         final_predict = sess.run(predict, feed_dict={X: test_X, y: test_y})
         final_train_predict = sess.run(predict, feed_dict={X: train_X, y: train_y})
 
-    print("Seed: " + str(RANDOM_SEED))
+    if printing:
+        print("Seed: " + str(RANDOM_SEED))
 
-    #print(np.argmax(test_y, axis=1))
-    #print(final_predict)
+        #print(np.argmax(test_y, axis=1))
+        #print(final_predict)
 
-    print(confusionMatrix(np.argmax(test_y, axis=1), final_predict))
+        print(confusionMatrix(np.argmax(test_y, axis=1), final_predict))
+
+    return (trainAccuracy[-1], testAccuracy[-1])
+
+def main():
+    if HYPERSEARCH:
+        SAVE = False
+        PICKLE_ACCURACIES = False
+
+        results = []
+
+        hiddenLayers = [10, 15, 20]
+        regular = ["L1", "L2"]
+        scales = [0.01, 0.005, 0.001, 0.0005, 0.0001]
+        weights = ["Both", "Only W2"]
+
+        s = [hiddenLayers, regular, scales, weights]
+
+        allOptions = list(itertools.product(*s))
+
+        for option in allOptions:
+
+            HIDDEN_NODES = option[0]
+            REGULARIZER = option[1]
+            SCALE = option[2]
+            REGULARIZE_WEIGHTS = option[3] # Either "Both" or default is only w_2 
+
+            X = runNN(printing = False)
+            train = X[0]
+            test = X[1]
+
+            results.append((train, test, option[0], option[1], option[2], option[3]))
+        
+        for resultTuple in results:
+            print( "Train accuracy of %.2f%% and test of %.2f%% with %d hidden nodes and a %s regularizer with scale of %f applied to 5s"  % resultTuple)
+    else:
+        runNN()
 
 if __name__ == '__main__':
     main()
