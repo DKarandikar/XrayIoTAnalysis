@@ -8,6 +8,9 @@ BURST_TIME_INTERVAL = 1
 FLOW_SIZE_CUTOFF = 20   # Minimum number of packets to be counted as a valid flow
 FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
+OUTPUTNAME = "FlowFeatures.csv"
+FOLDERNAME = "savedPackets"
+
 def getStatistics(listInts):
     """
     Get 18 statistical features out of a list of integers
@@ -204,7 +207,7 @@ def getCSVWriter(timeData=False):
     if not os.path.exists(csvPath):
         os.makedirs(csvPath)
 
-    dataFile = "FlowfeaturesDeltas.csv"
+    dataFile = OUTPUTNAME
 
     if timeData:
         dataFile = "FlowFeaturesTime.csv"
@@ -299,9 +302,8 @@ def main():
 
     # get all pcap files
 
-    now = datetime.datetime.now()
-    date = "%d-%d-%d" % (now.day, now.month, now.year)
-    packetsPath = os.path.join(FILE_PATH, "savedPackets" + date)
+    
+    packetsPath = os.path.join(FILE_PATH, FOLDERNAME)
 
     f = []
     for (d, dn, filenames) in os.walk(packetsPath):
