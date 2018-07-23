@@ -7,6 +7,7 @@ train = pickle.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__))
 
 x = np.arange(len(test)) 
 
+#plt.plot(x, train)
 plt.plot(x, test)
 plt.plot(x, train)
 

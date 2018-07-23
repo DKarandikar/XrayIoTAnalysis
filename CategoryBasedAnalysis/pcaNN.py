@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 
 ## Constants to control the whole process  ==========================
 
-HYPERSEARCH = True # Whether or not to do hyperparameter search 
+HYPERSEARCH = False # Whether or not to do hyperparameter search 
 REGULARIZE = True # Apply regularization
 SAVE = True # Wether to save the model
 PICKLE_ACCURACIES = True # Whether to pickle accuracies
@@ -32,12 +32,12 @@ RANDOMISE_DATA = False # Randomise all classes to see if too much structure, onl
 
 ## Constants about the model =========================
 
-HIDDEN_NODES = 20 
+HIDDEN_NODES = 15 
 SAVE_INTERVAL = 500
 TOTAL_EPOCHS = 1500
 
-REGULARIZER = "L1" # Either "L1" or "L2" is the default
-SCALE = 0.005 # Scale for regularizer 
+REGULARIZER = "L2" # Either "L1" or "L2" is the default
+SCALE = 0.0005 # Scale for regularizer 
 REGULARIZE_WEIGHTS = "" # Either "Both" or default is only w_2 
 
 ## Other ===========================
@@ -311,8 +311,8 @@ def runNN(printing=True, saveNumber = False):
                 print ("                                                                   ", end="\r"),
                 print ("At %.5f with %.2f seconds left" % (epoch*1.0/TOTAL_EPOCHS, timeLeft), end="\r"),
 
-            testAccuracy.append(100. * train_accuracy)
-            trainAccuracy.append(100. * test_accuracy)
+            testAccuracy.append(100. * test_accuracy)
+            trainAccuracy.append(100. * train_accuracy)
 
             saveModelAndAccuracies(epoch, saver, sess, testAccuracy, trainAccuracy, saveNumber)
             
@@ -344,13 +344,18 @@ def main():
 
         allOptions = list(itertools.product(*s))
 
-        allOptions = [(10, "L1", 0.0001, "Only W2"),
+        ''' allOptions = [(10, "L1", 0.0001, "Only W2"),
                         (15, "L1", 0.01, "Only W2"),
                         (15, "L1", 0.0001, "Both"),
                         (20, "L2", 0.0001, "Only W2"),
-                        (10, "L1", 0.0005, "Both")]
+                        (10, "L1", 0.0005, "Both")] '''
 
         for index, option in enumerate(allOptions):
+            
+            global HIDDEN_NODES
+            global REGULARIZER
+            global SCALE
+            global REGULARIZE_WEIGHTS
 
             HIDDEN_NODES = option[0]
             REGULARIZER = option[1]
