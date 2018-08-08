@@ -1,13 +1,17 @@
+"""
+Script for visualising a pcap file
+Displays a graph with time on x-axis and packet length on the y-axis 
+"""
 import statistics, pyshark, os
 import matplotlib.pyplot as plt
 
-pkts = pyshark.FileCapture(os.path.join(os.path.dirname(os.path.abspath(__file__)), "pcaps", "GoogleHomeBackground1.pcap"))
+pkts = pyshark.FileCapture(os.path.join(os.path.dirname(os.path.abspath(__file__)), "pcaps", "NokiaScaleSingleUse0.pcap"))
 
-DEVICE_IP = "192.168.4.2"
+DEVICE_IP = "192.168.4.12"
 PHONE_IP = "192.168.4.19"
 
-IGNORE_PHONE = False
-TIME_INTERVAL = False
+IGNORE_PHONE = False    # Whether or not to ignore packets to/from the phone IP 
+TIME_INTERVAL = False   # Whether or not to restrict to only a set time interval
 
 START_TIME = 79
 END_TIME = 124
@@ -40,7 +44,7 @@ for p in pkts:
 
 fig, ax = plt.subplots()
 
-fig.suptitle('Incoming (blue) and outgoing (red) packet sizes during a burst')
+fig.suptitle('Incoming (blue) and outgoing (red) packet sizes')
 plt.ylabel('Packet size (Bytes)')
 plt.xlabel('Time (secs)')
 

@@ -1,3 +1,7 @@
+"""
+Not used anymore, but got only the incoming data out of a set of statistics 
+"""
+
 import os, csv, random
 
 if os.path.isfile(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "onlyIncoming.csv")):

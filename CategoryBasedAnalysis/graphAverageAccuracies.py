@@ -1,3 +1,7 @@
+"""
+Graphs test and train accuracies but also bins to get a smoother line output
+Displays the normal graph and the line through it 
+"""
 import pickle, os, math
 import numpy as np
 import matplotlib.pyplot as plt

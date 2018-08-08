@@ -1,3 +1,7 @@
+"""
+Counts the classes in a csv file
+Gives values of how many of each category is used in a given set of statistics 
+"""
 import os, csv
 
 numbers = [0 for x in range(15)]

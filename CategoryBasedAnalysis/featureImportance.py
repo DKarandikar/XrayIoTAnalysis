@@ -1,3 +1,7 @@
+"""
+Uses various predictors to evaluate feature importance
+Sample output is in a comment below
+"""
 import os, pickle
 import numpy as np
 import pandas as pd
@@ -80,7 +84,7 @@ y = np.genfromtxt(ORIGINAL_DATA, delimiter=",", usecols=1)
 forest = ExtraTreesClassifier(n_estimators=250, random_state=0)
 forest2 = RandomForestClassifier(n_estimators=250, random_state=0)
 gradient = GradientBoostingClassifier(n_estimators=100, random_state=0)
-#ada = AdaBoostClassifier(n_estimators=1000, random_state=0)
+#ada = AdaBoostClassifier(n_estimators=1000, random_state=0)    # ada gave NaN several times and so was ignored 
 
 fitAndPrint(forest, normalized, y)
 fitAndPrint(forest2, normalized, y)

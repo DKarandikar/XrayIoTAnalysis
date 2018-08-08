@@ -1,3 +1,7 @@
+"""
+Splits an audio file into the regions of high amplitude 
+c.f. recordingInfo.py
+"""
 import os, copy
 import numpy as np
 from scipy.io import wavfile

@@ -1,17 +1,14 @@
-import os, sys, random
+"""
+Displays a bar chart with average time between packets in each burst, per category 
+"""
 
+import os, sys, random
 import numpy as np
 import matplotlib.pyplot as plt
-
 from collections import defaultdict
-
-
-#sys.path.append(os.path.join(os.path.dirname(__file__), ".."))  
-
 from scapy.all import rdpcap
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(__file__)), "AutomatedCapture"))
-
 import statisticProcessing
 
 
@@ -25,9 +22,7 @@ def getFiles():
     return files
 
 files = getFiles()
-
 dct = defaultdict(list)
-
 success = 0
 
 for file in files:

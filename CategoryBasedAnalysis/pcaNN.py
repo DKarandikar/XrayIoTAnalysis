@@ -1,3 +1,7 @@
+"""
+Main script used to run the neural network
+Constants below control the activity of this 
+"""
 import tensorflow as tf
 import random, os, pickle, sys, time
 import numpy as np

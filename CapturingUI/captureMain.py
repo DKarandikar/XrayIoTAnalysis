@@ -1,3 +1,7 @@
+"""
+Main script for the UI to capture packets from multiple devices
+Run this and then click Start Scan to begin capturing
+"""
 import threading, asyncio, tkinter, time, json, os
 from tkinter.ttk import Frame, Button, Style, Scrollbar
 from collections import defaultdict
@@ -14,8 +18,6 @@ with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),"config.json")
     summaries = data["only_summaries"] == "True"
     
 PACKET_LABEL_TEXT = "Total packets so far: "
-
-
 
 class Capturing(Frame):
     

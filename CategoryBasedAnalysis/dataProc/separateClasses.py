@@ -1,3 +1,6 @@
+"""
+Gets only the classes specified in CLASSES
+"""
 import os, csv
 
 CLASSES = [5,6]

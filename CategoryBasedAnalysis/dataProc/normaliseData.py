@@ -1,3 +1,7 @@
+"""
+Not used anymore, min/max normalised a set of data 
+Now we do the normalisation as part of the PCA step 
+"""
 import os
 import pandas as pd
 

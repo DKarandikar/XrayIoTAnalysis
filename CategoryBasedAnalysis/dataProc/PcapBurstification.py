@@ -1,3 +1,7 @@
+"""
+Script to separate a pcap into bursts
+"""
+
 from scapy.all import *
 
 PCAPS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pcaps")

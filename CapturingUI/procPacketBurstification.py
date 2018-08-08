@@ -1,3 +1,6 @@
+"""
+Splits pickled packets into bursts, but again this not used anymore 
+"""
 import os,  inspect, json
 from scapy.all import rdpcap, wrpcap, IP
 

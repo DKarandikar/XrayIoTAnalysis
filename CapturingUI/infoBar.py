@@ -1,3 +1,7 @@
+"""
+One line of the capture UI
+Corresponds to a single local IP address
+"""
 import tkinter
 from tkinter import Tk, RIGHT, BOTH, RAISED, LEFT
 from tkinter.ttk import Frame, Button, Style, Scrollbar

@@ -1,5 +1,7 @@
+"""
+Got all IPs out of pickled packets, but we don't use this anymore
+"""
 import os, inspect, json
-
 from scapy.all import rdpcap, IP
 
 def get_immediate_subdirectories(a_dir):

@@ -1,6 +1,8 @@
+"""
+Methods to process packets in the capture UI 
+"""
 import pickle, os, json, threading
 import datetime
-
 from scapy.all import IP, wrpcap
 
 now = datetime.datetime.now()
@@ -37,7 +39,7 @@ def processPacket(packet, ipDict):
 
 def savingPackets(IP, device, action, ipDict, label):
     """
-    Saves packets in a .p file for the IP with device and Action Name
+    Saves packets in a .pcap file for the IP with device and Action Name
     Clears that entry from ipDict and returns it
     """
     counter = 0

@@ -1,7 +1,11 @@
 """
 Loads and tests a particular model of the NN 
+Prints test/train accuracy and the confusion matrix 
+
 In general constants to change are:
-    MODEL_META_FILENAME, NUMBER_COLUMNS, COMBINE_LIGHTS and ONLY_KEY_CATEGORIES
+    MODEL_META_FILENAME, NUMBER_COLUMNS, COMBINE_LIGHTS and ONLY_KEY_CATEGORIES or WEATHER_CATEGORIES
+
+Look at pcaNN.py for more detail on what all the constants are 
 """
 import tensorflow as tf
 import random, os, pickle, sys
@@ -12,17 +16,17 @@ from tensorflow.python.tools.inspect_checkpoint import print_tensors_in_checkpoi
 
 RANDOM_SEED = 83
 MODELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
-MODEL_META_FILENAME = "model_normalizedPCAWeatherDeltas3-1500.meta"
-NUMBER_HIDDEN_NODES = 15
+MODEL_META_FILENAME = "model_normalizedPCAGoogle-3500.meta"
+NUMBER_HIDDEN_NODES = 20
 
-DATA_FILENAME = "normalizedPCAWeatherDeltas.csv"
-NUMBER_COLUMNS = 26
+DATA_FILENAME = "normalizedPCAGoogle.csv"
+NUMBER_COLUMNS = 20
 NP_SAVE = False
 
-COMBINE_LIGHTS = False
-ONLY_KEY_CATEGORIES = False # Only Time, Shopping, Joke, LightsCombined and Alarms
+COMBINE_LIGHTS = True
+ONLY_KEY_CATEGORIES = True # Only Time, Shopping, Joke, LightsCombined and Alarms
 
-WEATHER_CATEGORIES = True # Use if categories are 21, 22, 23, 24 
+WEATHER_CATEGORIES = False # Use if categories are 21, 22, 23, 24 
 
 onlyIncoming = False
 DATA_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataProc", "data", DATA_FILENAME )
@@ -89,6 +93,7 @@ def get_data():
     data = np.float32(d)
     target = labels.flatten()
     
+    # combines the two light categories together
     if COMBINE_LIGHTS:
         for index, value in enumerate(target):
             if value == 10:
@@ -96,6 +101,7 @@ def get_data():
             if value > 10:
                 target[index] = value - 1
 
+    # uses only the key categories, i.e. the most popular 
     if ONLY_KEY_CATEGORIES:
     
         totalKeyCategories = 0
@@ -118,6 +124,7 @@ def get_data():
         data = newData
         target = newTarget
 
+    # Necessary if using weather location categories 21, 22, 23 and 24
     if WEATHER_CATEGORIES:
         newTarget = np.zeros(shape = target.shape, dtype=int)
         for index, value in enumerate(target):
@@ -125,11 +132,7 @@ def get_data():
 
         target = newTarget
 
-    #print(data.shape)
 
-    #data /= np.max(np.abs(data)+0.0000001, axis=0)
-
-    #print(data)
 
     # Prepend the column of 1s for bias
     N, M  = data.shape

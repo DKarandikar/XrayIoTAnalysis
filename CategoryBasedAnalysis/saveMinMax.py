@@ -1,3 +1,8 @@
+"""
+Used when using live classify with min/max scaled predictions
+Saves data that has been min/max scaled 
+Not used anymore 
+"""
 import os, csv, random
 
 if os.path.isfile(os.path.join(os.path.dirname(os.path.abspath(__file__)), "liveCapFiles",  "minMax.csv")):

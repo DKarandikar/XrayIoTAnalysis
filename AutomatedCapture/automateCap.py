@@ -31,6 +31,7 @@ def getFiles():
     return files
 
 def loopSong(filename, plays):
+    """ Plays a song for [plays] times using vlc """
     playlist = []
     for x in range(plays):
         playlist.append(filename)
@@ -40,6 +41,7 @@ def loopSong(filename, plays):
     call(command)
 
 def getFileLength(filename):
+    """ gets file length as a string using ffmpeg"""
     if filename in FILE_LENGTHS.keys():
         return FILE_LENGTHS[filename]
     else:
@@ -48,12 +50,14 @@ def getFileLength(filename):
         return mycmd
 
 def convertFloatLength(string):
+    """ Converts a string time to an int """"
     hours = string.split(":")[0]
     minutes = string.split(":")[1]
     seconds = string.split(":")[2].split(".")[0]
     return (3600*int(hours) + 60*int(minutes) + int(seconds) + 1)
 
 def playForLessXMins(filename):
+    """ Plays [filename] for less than SESSION_LENGTH seconds """
     fileLength = getFileLength(filename)
     lengthFloat = convertFloatLength(fileLength)
     numberPlays = math.floor(1.0* SESSION_LENGTH / float(lengthFloat))

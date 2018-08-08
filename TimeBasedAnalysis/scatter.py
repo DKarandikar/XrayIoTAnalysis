@@ -1,3 +1,7 @@
+"""
+Generates scatter plots comparing incoming/outgoing packet lengths with times
+Also calculates and prints linear regression values to terminal
+"""
 import matplotlib.pyplot as plot
 import pylab, csv, scipy.stats
 

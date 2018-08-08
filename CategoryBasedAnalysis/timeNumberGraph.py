@@ -1,3 +1,8 @@
+"""
+Script to display question/answer duration against number of packets in that burst
+Option to bin the data or not, binned data has error bars for 1 std 
+"""
+
 import pickle, os, math
 import numpy as np
 import matplotlib.pyplot as plt
@@ -5,7 +10,8 @@ import matplotlib.cm as cm
 import scipy.stats
 
 outgoing = True
-binSameDuration = True  # Bin categories 
+binSameDuration = True  # Bin categories?
+
 
 ROUNDING_DP = 2
 
@@ -14,17 +20,6 @@ ORIGINAL_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataPr
 durations = np.genfromtxt(ORIGINAL_DATA, delimiter=",", usecols=2)
 number = np.genfromtxt(ORIGINAL_DATA, delimiter=",", usecols=23)
 category = np.genfromtxt(ORIGINAL_DATA, delimiter=",", usecols=1)
-
-""" DEPRACATED 
-removedDur = []
-removedNum = []
-
-for index in range(len(durations)):
-    if category[index] != 10 and category[index] != 11:
-        removedDur.append(durations[index])
-        removedNum.append(number[index])
-
-print(scipy.stats.linregress(removedDur, removedNum)) """
 
 if outgoing == False:
     durations = np.genfromtxt(ORIGINAL_DATA, delimiter=",", usecols=3)

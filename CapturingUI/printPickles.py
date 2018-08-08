@@ -1,5 +1,7 @@
 import os, pickle
 
+# Not used anymore, pickling the packets was a bad idea
+# Scapy was far better than pyshark in this instance 
 
 PCAPS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pickledPackets30-5-2018")
 

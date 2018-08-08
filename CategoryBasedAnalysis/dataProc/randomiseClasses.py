@@ -1,3 +1,7 @@
+"""
+Takes a data file and outputs one with all classes randomised
+This is not integrated into pcaNN.py if required 
+"""
 import os, csv, random
 
 if os.path.isfile(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",  "randomised.csv")):

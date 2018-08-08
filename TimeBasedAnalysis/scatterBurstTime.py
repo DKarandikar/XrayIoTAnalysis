@@ -1,3 +1,8 @@
+"""
+Generates and displays a scatter plot out of a csv file
+Designed to display time of question/answer and packet lengths
+scatter.py is a better version of this, this was not used
+"""
 import matplotlib.pyplot as plot
 import pylab, csv, scipy.stats
 

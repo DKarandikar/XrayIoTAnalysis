@@ -1,3 +1,6 @@
+"""
+Get standard 54 statistics for both packet lengths and time deltas
+"""
 import os, datetime, csv
 import pandas as pd
 from scapy.all import IP, rdpcap

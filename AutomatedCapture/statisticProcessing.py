@@ -1,3 +1,7 @@
+"""
+Methods for generating the standard 54 statistics out of a packet capture 
+"""
+
 import os, datetime, csv
 import pandas as pd
 from scapy.all import IP
@@ -15,6 +19,8 @@ def getStatistics(listInts):
     result = []
     df = pd.DataFrame()
     df['data'] = listInts
+
+
 
     result.append(df['data'].min())
     result.append(df['data'].max())

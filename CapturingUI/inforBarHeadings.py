@@ -1,3 +1,6 @@
+"""
+Heading line for the capture UI 
+"""
 import tkinter
 from tkinter import Tk, RIGHT, BOTH, RAISED, LEFT
 from tkinter.ttk import Frame, Button, Style, Scrollbar

@@ -1,11 +1,3 @@
-import pyaudio, struct, math, datetime, os, threading, time, copy, wave
-import numpy as np
-from scapy.all import sniff, wrpcap
-from subprocess import call, Popen, PIPE, getoutput
-from multiprocessing import Pool
-
-import statisticProcessing
-
 """
 Repeat:
 **
@@ -18,6 +10,13 @@ End sniff, process
 **
 
 """
+import pyaudio, struct, math, datetime, os, threading, time, copy, wave
+import numpy as np
+from scapy.all import sniff, wrpcap
+from subprocess import call, Popen, PIPE, getoutput
+from multiprocessing import Pool
+
+import statisticProcessing
 
 INTERFACE_NAME = "wlan0"
 DEVICE_IP = "192.168.4.2"

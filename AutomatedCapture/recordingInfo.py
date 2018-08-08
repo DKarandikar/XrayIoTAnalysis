@@ -1,12 +1,20 @@
+"""
+Test getting blocks of high aplitude out of a file
+Example output:
+Length is 60.79 seconds
+Block finished from 0.82 to 2.58
+Block finished from 15.41 to 17.11
+Block finished from 30.07 to 31.81
+Block finished from 36.51 to 37.01
+Block finished from 45.79 to 47.48
+"""
 import os, copy
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
 
 FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)))
-
 fs, data = wavfile.read(os.path.join(FILE_PATH, "audioFilesWav", "Unknown - AlexaTime1Rec.wav"))
-
 ALLOWED_DIP_FRAMES = fs
 
 print("Length is %.2f seconds" % (len(data)*1.0 / float(fs)))

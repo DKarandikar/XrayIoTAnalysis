@@ -1,3 +1,8 @@
+"""
+Live classify script
+Captures packets from a device on the network and attempts to classify 
+At the moment this works for Amazon Echo but could be adapted to Google Home easily
+"""
 import os, csv, _thread, pickle
 import numpy as np
 import pandas as pd

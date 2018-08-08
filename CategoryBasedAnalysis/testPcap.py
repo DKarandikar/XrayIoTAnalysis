@@ -1,3 +1,7 @@
+"""
+Runs a pcap file against a trained model and outputs predictions for 
+each burst it finds in that pcap file 
+"""
 import os, statistics, csv, pyshark
 from scapy.all import *
 import pandas as pd

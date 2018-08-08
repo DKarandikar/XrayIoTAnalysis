@@ -1,3 +1,7 @@
+"""
+Basic script to graph test/train accuracies
+"""
+
 import pickle, os
 import numpy as np
 import matplotlib.pyplot as plt

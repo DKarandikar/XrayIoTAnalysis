@@ -1,5 +1,6 @@
 """
 Important Note: This is specialised to Amazon Echo (Alexa) right now
+Extracts statistical features from a folder full of pcaps each of which is a burst
 """
 
 import os, sys
@@ -183,8 +184,6 @@ for file in f:
 
                 writer.writerow(row)
 
-    if "AlexaConversion1burst67" in file:
-        sys.exit()
         
     
 output.close()
